@@ -3,9 +3,9 @@ import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import Countdown from "./components/Countdown.vue";
-import type { IRaceHorse, IHorse, ITrackCondition } from "@/utils/types";
-import type { TSurface } from "@/constants/race";
-import { clamp } from "@/utils/math";
+import type { IRaceHorse, IHorse, ITrackCondition } from "@/shared/types";
+import type { TSurface } from "@/shared/constants";
+import { clamp } from "@/shared/utils";
 
 const RACE_TICK_MS = 100;
 const PARALLAX_SPEED = 2;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import BaseCard from "@/components/base/BaseCard.vue";
-import type { IHorse } from "@/utils/types";
+import Card from "@/shared/components/ui/Card.vue";
+import type { IHorse } from "@/shared/types";
 
 interface Props {
   horse: IHorse;
@@ -22,7 +22,7 @@ const conditionColor = computed(() => {
 </script>
 
 <template>
-  <BaseCard hoverable :padding="compact ? 'xs' : 'md'" class="horse-card" :class="{ compact }">
+  <Card hoverable :padding="compact ? 'sm' : 'md'" class="horse-card" :class="{ compact }">
     <template v-if="compact">
       <div class="horse-header compact-header">
         <!-- <div class="horse-id">{{ horse.id }}</div> -->
@@ -30,7 +30,7 @@ const conditionColor = computed(() => {
       </div>
       <div class="horse-name">{{ horse.name }}</div>
       <div class="condition-section compact-condition">
-        <div class="condition-value">{{ horse.currentCondition.toFixed(2) }}/100</div>
+        <div class="condition-value">{{ horse.currentCondition.toFixed(0) }}/100</div>
         <div class="progress-bar">
           <div
             class="progress-fill"
@@ -67,7 +67,7 @@ const conditionColor = computed(() => {
         </div>
       </div>
     </template>
-  </BaseCard>
+  </Card>
 </template>
 
 <style scoped lang="scss">

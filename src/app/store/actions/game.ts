@@ -9,11 +9,12 @@ import type {
   TTurfCond,
   THybridCond,
   IRaceHorse,
-} from "@/utils/types";
-import type { TSurface } from "@/constants/race";
+  IGrandFinalResults,
+} from "@/shared/types";
+import type { TSurface } from "@/shared/constants";
 import { generateHorses } from "@/generators/horses";
-import { ROUND_DISTANCES, HORSES_PER_ROUND, TRACK_CONDITION_MULTIPLIER } from "@/constants/race";
-import { affinityToMul, clamp } from "@/utils/math";
+import { ROUND_DISTANCES, HORSES_PER_ROUND, TRACK_CONDITION_MULTIPLIER } from "@/shared/constants";
+import { affinityToMul, clamp } from "@/shared/utils";
 
 type GameActionContext = ActionContext<IGameState, Record<string, any>>;
 
@@ -184,7 +185,10 @@ export const actions: IGameActions = {
     commit("RESUME_RACE");
   },
 
-  async finishRace({ commit, state }: GameActionContext, results: string[]): Promise<void> {
+  async finishRace(
+    { commit, state, dispatch }: GameActionContext,
+    results: string[],
+  ): Promise<void> {
     commit("FINISH_RACE", results);
 
     const horses = [...state.horses];
@@ -203,6 +207,11 @@ export const actions: IGameActions = {
       }
     });
     commit("SET_HORSES", horses);
+
+    // If this was the 6th round, calculate grand final results
+    if (state.currentRound === 6) {
+      await dispatch("calculateGrandFinalResults");
+    }
   },
 
   async updateHorsePositions(
@@ -223,5 +232,35 @@ export const actions: IGameActions = {
         commit("SET_TRACK", nextRound.track);
       }
     }
+  },
+
+  async calculateGrandFinalResults({ commit, state }: GameActionContext): Promise<void> {
+    // Calculate total points for each horse across all rounds
+    const horseTotalPoints: Record<string, number> = {};
+
+    state.roundPoints.forEach((roundPoint) => {
+      Object.entries(roundPoint.horsePoints).forEach(([horseId, points]) => {
+        horseTotalPoints[horseId] = (horseTotalPoints[horseId] || 0) + points;
+      });
+    });
+
+    // Convert to array and sort by total points (descending)
+    const grandFinalResults: IGrandFinalResults[] = Object.entries(horseTotalPoints)
+      .map(([horseId, totalPoints]) => ({
+        horseId,
+        totalPoints,
+        finalPosition: 0, // Will be set after sorting
+      }))
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .map((result, index) => ({
+        ...result,
+        finalPosition: index + 1,
+      }));
+
+    commit("SET_GRAND_FINAL_RESULTS", grandFinalResults);
+  },
+
+  async clearLastFinishedRound({ commit }: GameActionContext): Promise<void> {
+    commit("SET_LAST_FINISHED_ROUND", null);
   },
 };

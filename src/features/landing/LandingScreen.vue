@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import BaseButton from "@/components/base/BaseButton.vue";
+import Button from "@/shared/components/ui/Button.vue";
 
 const router = useRouter();
 
@@ -23,7 +23,7 @@ const handlePlay = () => {
       </div>
 
       <div class="action-section">
-        <BaseButton size="lg" @click="handlePlay">
+        <Button size="lg" @click="handlePlay">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -35,7 +35,7 @@ const handlePlay = () => {
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
           PLAY
-        </BaseButton>
+        </Button>
       </div>
     </div>
   </div>

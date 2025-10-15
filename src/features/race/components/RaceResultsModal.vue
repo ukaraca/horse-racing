@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "vuex";
-import BaseButton from "@/components/base/BaseButton.vue";
-import type { IHorse } from "@/utils/types";
+import Button from "@/shared/components/ui/Button.vue";
+import type { IHorse } from "@/shared/types";
 
 interface Props {
   isVisible: boolean;
@@ -82,7 +82,7 @@ const handleClose = () => {
       </div>
 
       <div class="modal-actions">
-        <BaseButton size="lg" @click="handleClose"> Close </BaseButton>
+        <Button size="lg" @click="handleClose"> Close </Button>
       </div>
     </div>
   </div>

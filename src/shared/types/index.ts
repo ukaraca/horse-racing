@@ -1,4 +1,4 @@
-import type { TSurface, TRoundDistance } from "@/constants/race";
+import type { TSurface, TRoundDistance } from "../constants";
 
 export type TDirtCond = "fast" | "good" | "wet" | "muddy";
 export type TTurfCond = "firm" | "good" | "soft" | "heavy";
@@ -55,4 +55,15 @@ export interface ISettings {
   isMusicEnabled: boolean;
   isSoundEnabled: boolean;
   isFullscreenEnabled: boolean;
+}
+
+export interface IGrandFinalResults {
+  horseId: string;
+  totalPoints: number;
+  finalPosition: number;
+}
+
+export interface IRoundPoints {
+  roundId: number;
+  horsePoints: Record<string, number>; // horseId -> points
 }

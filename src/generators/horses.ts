@@ -1,6 +1,6 @@
-import { CONDITION_MAX, CONDITION_MIN, HORSE_COUNT_TOTAL, SURFACES } from "@/constants/race";
-import type { IHorse } from "@/utils/types";
-import { generateUniqueColors } from "@/utils/colors";
+import { CONDITION_MAX, CONDITION_MIN, HORSE_COUNT_TOTAL, SURFACES } from "@/shared/constants";
+import type { IHorse } from "@/shared/types";
+import { generateUniqueColors } from "@/shared/utils/colors";
 import {
   uniqueNamesGenerator,
   adjectives,

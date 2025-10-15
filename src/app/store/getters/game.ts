@@ -14,4 +14,7 @@ export const getters: IGameGetters = {
   isSoundEnabled: (state: IGameState) => state.settings.isSoundEnabled,
   isFullscreenEnabled: (state: IGameState) => state.settings.isFullscreenEnabled,
   raceState: (state: IGameState) => state.raceState,
+  lastFinishedRoundId: (state: IGameState) => state.lastFinishedRoundId,
+  grandFinalResults: (state: IGameState) => state.grandFinalResults,
+  roundPoints: (state: IGameState) => state.roundPoints,
 };

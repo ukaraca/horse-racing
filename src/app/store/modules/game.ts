@@ -25,6 +25,9 @@ const state: () => IGameState = () => ({
     finishLineX: 0,
     raceStartTime: 0,
   },
+  lastFinishedRoundId: null,
+  grandFinalResults: [],
+  roundPoints: [],
 });
 
 export default {

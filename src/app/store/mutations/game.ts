@@ -7,7 +7,9 @@ import type {
   ISettings,
   IRaceState,
   IRaceHorse,
-} from "@/utils/types";
+  IGrandFinalResults,
+  IRoundPoints,
+} from "@/shared/types";
 
 export const mutations: IGameMutations = {
   SET_HORSES(state: IGameState, horses: IHorse[]) {
@@ -69,6 +71,9 @@ export const mutations: IGameMutations = {
       finishLineX: 0,
       raceStartTime: 0,
     };
+    state.lastFinishedRoundId = null;
+    state.grandFinalResults = [];
+    state.roundPoints = [];
   },
 
   SET_RACE_STATE(state: IGameState, raceState: Partial<IRaceState>) {
@@ -100,5 +105,29 @@ export const mutations: IGameMutations = {
       roundId: state.currentRound,
       order: results,
     });
+
+    // Set last finished round ID for modal auto-open
+    state.lastFinishedRoundId = state.currentRound;
+
+    // Calculate points for this round (1st gets 10 points, 2nd gets 9, etc.)
+    const horsePoints: Record<string, number> = {};
+    results.forEach((horseId, index) => {
+      const points = results.length - index; // 10 points for 1st, 9 for 2nd, etc.
+      horsePoints[horseId] = points;
+    });
+
+    // Store round points
+    state.roundPoints.push({
+      roundId: state.currentRound,
+      horsePoints,
+    });
+  },
+
+  SET_LAST_FINISHED_ROUND(state: IGameState, roundId: number | null) {
+    state.lastFinishedRoundId = roundId;
+  },
+
+  SET_GRAND_FINAL_RESULTS(state: IGameState, results: IGrandFinalResults[]) {
+    state.grandFinalResults = results;
   },
 };

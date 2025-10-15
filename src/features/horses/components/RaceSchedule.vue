@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "vuex";
-import BaseCard from "@/components/base/BaseCard.vue";
-import type { IHorse } from "@/utils/types";
+import Card from "@/shared/components/ui/Card.vue";
+import type { IHorse } from "@/shared/types";
 
 const store = useStore();
 const rounds = computed(() => store.getters["game/rounds"]);
@@ -24,7 +24,7 @@ const emit = defineEmits<{
     </div>
 
     <div v-else class="rounds-list">
-      <BaseCard v-for="round in rounds" :key="round.id" class="round-card" padding="sm">
+      <Card v-for="round in rounds" :key="round.id" class="round-card" padding="sm">
         <div class="round-header">
           <div class="round-info">
             <h3>Round {{ round.id }}</h3>
@@ -81,7 +81,7 @@ const emit = defineEmits<{
             </div>
           </div>
         </div>
-      </BaseCard>
+      </Card>
     </div>
   </div>
 </template>

@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import HorseCard from "./components/HorseCard.vue";
 import RaceSchedule from "./components/RaceSchedule.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import Button from "@/shared/components/ui/Button.vue";
 import RaceResultsModal from "@/features/race/components/RaceResultsModal.vue";
-import type { IRound } from "@/utils/types";
+import FinalResultsModal from "@/features/race/components/FinalResultsModal.vue";
+import type { IRound, IGrandFinalResults } from "@/shared/types";
 
 const store = useStore();
 const router = useRouter();
 const horses = computed(() => store.getters["game/horses"]);
 const rounds = computed(() => store.getters["game/rounds"] as IRound[]);
-// const currentRound = computed(() => store.getters["game/currentRound"]); // Removed unused variable
+const lastFinishedRoundId = computed(
+  () => store.getters["game/lastFinishedRoundId"] as number | null,
+);
+const grandFinalResults = computed(
+  () => store.getters["game/grandFinalResults"] as IGrandFinalResults[],
+);
 
 // Modal state
 const showResultsModal = ref(false);
+const showFinalResultsModal = ref(false);
 const selectedRoundResults = ref<string[]>([]);
 const selectedRoundNumber = ref(0);
 
@@ -28,18 +35,28 @@ const hasStartedRaces = computed(() => {
   return rounds.value.some((round: IRound) => round.result);
 });
 
-// Find next race to start
+// Check if all rounds are completed (6 rounds)
+const allRoundsCompleted = computed(() => {
+  return rounds.value.length === 6 && rounds.value.every((round: IRound) => round.result);
+});
+
+// Find next race to start - fix for bug where it goes back to round 1 after round 6
 const nextRoundId = computed(() => {
+  if (allRoundsCompleted.value) {
+    return null; // No next round if all completed
+  }
   const lastCompletedIndex = rounds.value.findIndex((round: IRound) => !round.result);
   const nextRound = lastCompletedIndex !== -1 ? rounds.value[lastCompletedIndex] : null;
   return nextRound?.id || 1;
 });
 
 const handleStartRace = async () => {
-  // Start the next race
-  await store.dispatch("game/startRace", nextRoundId.value);
-  // Go to race page
-  router.push({ name: "race" });
+  if (nextRoundId.value) {
+    // Start the next race
+    await store.dispatch("game/startRace", nextRoundId.value);
+    // Go to race page
+    router.push({ name: "race" });
+  }
 };
 
 const handleShowResults = (roundId: number) => {
@@ -53,7 +70,37 @@ const handleShowResults = (roundId: number) => {
 
 const handleCloseModal = () => {
   showResultsModal.value = false;
+  // Clear the last finished round ID after closing modal
+  store.dispatch("game/clearLastFinishedRound");
 };
+
+const handleCloseFinalResultsModal = () => {
+  showFinalResultsModal.value = false;
+};
+
+const handleShowFinalResults = async () => {
+  // Calculate grand final results if not already calculated
+  if (grandFinalResults.value.length === 0) {
+    await store.dispatch("game/calculateGrandFinalResults");
+  }
+  showFinalResultsModal.value = true;
+};
+
+// Auto-open modal when returning from race
+watch(
+  lastFinishedRoundId,
+  (newRoundId) => {
+    if (newRoundId !== null) {
+      const round = rounds.value.find((r: IRound) => r.id === newRoundId);
+      if (round?.result) {
+        selectedRoundResults.value = round.result;
+        selectedRoundNumber.value = newRoundId;
+        showResultsModal.value = true;
+      }
+    }
+  },
+  { immediate: true },
+);
 
 // Route'a girince otomatik olarak hem atları hem race schedule'ı oluştur
 onMounted(async () => {
@@ -73,19 +120,41 @@ onMounted(async () => {
   <div class="race-management-page">
     <div class="race-header">
       <h1 class="page-title">Race Management</h1>
-      <BaseButton size="lg" @click="handleStartRace">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          style="margin-right: 8px"
+      <div class="race-header-buttons">
+        <Button
+          v-if="allRoundsCompleted"
+          size="md"
+          @click="handleShowFinalResults"
+          class="final-results-btn"
         >
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        {{ hasStartedRaces ? `Next Race (Round ${nextRoundId})` : "Start Race" }}
-      </BaseButton>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style="margin-right: 8px"
+          >
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            />
+          </svg>
+          Final Results
+        </Button>
+        <Button v-else-if="nextRoundId" size="md" @click="handleStartRace">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style="margin-right: 8px"
+          >
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          {{ hasStartedRaces ? `Next Race (Round ${nextRoundId})` : "Start Race" }}
+        </Button>
+      </div>
     </div>
 
     <div class="race-management-layout">
@@ -117,6 +186,13 @@ onMounted(async () => {
       :round-number="selectedRoundNumber"
       @close="handleCloseModal"
     />
+
+    <!-- Final Results Modal -->
+    <FinalResultsModal
+      :is-visible="showFinalResultsModal"
+      :results="grandFinalResults"
+      @close="handleCloseFinalResultsModal"
+    />
   </div>
 </template>
 
@@ -146,14 +222,32 @@ onMounted(async () => {
     margin: 0;
     @include pixel-text-shadow($black, rgba(0, 0, 0, 0.5), $shadow-offset-lg, $shadow-offset-xl);
   }
+}
 
-  // Start Race button alignment
+.race-header-buttons {
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+
+  // Button styling
   :deep(.base-button--lg) {
     font-size: $font-size-xl;
     padding: $spacing-md $spacing-xl;
     height: auto;
     display: flex;
     align-items: center;
+  }
+
+  .final-results-btn {
+    background: linear-gradient(135deg, var(--color-gold) 0%, #ffed4a 100%);
+    color: var(--color-black);
+    border-color: var(--color-gold);
+    font-weight: $font-weight-bold;
+
+    &:hover {
+      background: linear-gradient(135deg, #ffed4a 0%, var(--color-gold) 100%);
+      transform: translateY(-2px);
+    }
   }
 }
 

@@ -1,8 +1,8 @@
 import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
-import store from "./store";
-import "./styles/main.scss";
+import App from "./app/app.vue";
+import router from "./app/router";
+import store from "./app/store";
+import "./shared/styles/main.scss";
 
 const app = createApp(App);
 app.use(router);

@@ -7,8 +7,10 @@ import type {
   ISettings,
   IRaceState,
   IRaceHorse,
-} from "@/utils/types";
-import type { TSurface } from "@/constants/race";
+  IGrandFinalResults,
+  IRoundPoints,
+} from "@/shared/types";
+import type { TSurface } from "@/shared/constants";
 
 export interface IGameState {
   horses: IHorse[];
@@ -21,9 +23,13 @@ export interface IGameState {
   track: ITrackCondition | null;
   settings: ISettings;
   raceState: IRaceState;
+  lastFinishedRoundId: number | null;
+  grandFinalResults: IGrandFinalResults[];
+  roundPoints: IRoundPoints[];
 }
 
 export interface IGameMutations {
+  [key: string]: any;
   SET_HORSES(state: IGameState, horses: IHorse[]): void;
   SET_ROUNDS(state: IGameState, rounds: IRound[]): void;
   SET_RESULTS(state: IGameState, results: IResult[]): void;
@@ -40,9 +46,12 @@ export interface IGameMutations {
   PAUSE_RACE(state: IGameState): void;
   RESUME_RACE(state: IGameState): void;
   FINISH_RACE(state: IGameState, results: string[]): void;
+  SET_LAST_FINISHED_ROUND(state: IGameState, roundId: number | null): void;
+  SET_GRAND_FINAL_RESULTS(state: IGameState, results: IGrandFinalResults[]): void;
 }
 
 export interface IGameActions {
+  [key: string]: any;
   generateHorses(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
   generateRandomTrack(
     context: ActionContext<IGameState, Record<string, any>>,
@@ -71,9 +80,14 @@ export interface IGameActions {
     positions: IRaceHorse[],
   ): Promise<void>;
   nextRound(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  calculateGrandFinalResults(
+    context: ActionContext<IGameState, Record<string, any>>,
+  ): Promise<void>;
+  clearLastFinishedRound(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
 }
 
 export interface IGameGetters {
+  [key: string]: any;
   horses: (state: IGameState) => IHorse[];
   rounds: (state: IGameState) => IRound[];
   results: (state: IGameState) => IResult[];
@@ -87,4 +101,7 @@ export interface IGameGetters {
   isSoundEnabled: (state: IGameState) => boolean;
   isFullscreenEnabled: (state: IGameState) => boolean;
   raceState: (state: IGameState) => IRaceState;
+  lastFinishedRoundId: (state: IGameState) => number | null;
+  grandFinalResults: (state: IGameState) => IGrandFinalResults[];
+  roundPoints: (state: IGameState) => IRoundPoints[];
 }

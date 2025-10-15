@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import BaseModal from "@/components/base/BaseModal.vue";
-import BaseToggle from "@/components/base/BaseToggle.vue";
-import { useSettings } from "@/composables/useSettings";
-import { useFullscreen } from "@/composables/useFullscreen";
+import Modal from "@/shared/components/ui/Modal.vue";
+import Toggle from "@/shared/components/ui/Toggle.vue";
+import { useSettings } from "@/shared/composables/useSettings";
+import { useFullscreen } from "@/shared/composables/useFullscreen";
 
 interface Props {
   modelValue: boolean;
@@ -31,7 +31,7 @@ const fullscreenActive = computed(() => isFullscreen.value);
 </script>
 
 <template>
-  <BaseModal :model-value="modelValue" @update:model-value="handleClose">
+  <Modal :model-value="modelValue" @update:model-value="handleClose">
     <div class="settings-panel">
       <div class="settings-header">
         <h2>Settings</h2>
@@ -55,15 +55,11 @@ const fullscreenActive = computed(() => isFullscreen.value);
 
       <div class="settings-content">
         <div class="setting-item">
-          <BaseToggle
-            :model-value="isMusicEnabled"
-            label="Music"
-            @update:model-value="toggleMusic"
-          />
+          <Toggle :model-value="isMusicEnabled" label="Music" @update:model-value="toggleMusic" />
         </div>
 
         <div class="setting-item">
-          <BaseToggle
+          <Toggle
             :model-value="isSoundEnabled"
             label="Sound Effects"
             @update:model-value="toggleSound"
@@ -71,7 +67,7 @@ const fullscreenActive = computed(() => isFullscreen.value);
         </div>
 
         <div class="setting-item">
-          <BaseToggle
+          <Toggle
             :model-value="fullscreenActive"
             label="Fullscreen"
             @update:model-value="handleFullscreenToggle"
@@ -79,7 +75,7 @@ const fullscreenActive = computed(() => isFullscreen.value);
         </div>
       </div>
     </div>
-  </BaseModal>
+  </Modal>
 </template>
 
 <style scoped lang="scss">
