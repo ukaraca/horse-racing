@@ -1,0 +1,6 @@
+// Global SCSS imports - automatically included in all components
+// Do NOT import this file manually in components!
+
+@forward "./variables";
+@forward "./mixins";
+@forward "./pixel-art";

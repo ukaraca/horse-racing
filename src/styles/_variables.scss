@@ -1,0 +1,97 @@
+// Colors
+$primary: #4caf50;
+$primary-dark: #45a049;
+$primary-light: #66bb6a;
+$secondary: #2196f3;
+$secondary-dark: #1976d2;
+
+$background: #0f0f23;
+$background-light: #16162e;
+$surface: #1a1a2e;
+$surface-light: #2d2d44;
+$surface-lighter: #3a3a52;
+
+$text-primary: #ffffff;
+$text-secondary: #b0b0b0;
+$text-muted: #808080;
+
+$border: #3a3a52;
+$border-light: #4a4a62;
+
+$success: #4caf50;
+$warning: #ff9800;
+$error: #f44336;
+$info: #2196f3;
+
+// Neutral colors
+$black: #000000;
+$white: #ffffff;
+$gold: #ffd700;
+
+// Neutral alpha tokens
+$black-05: rgba(0, 0, 0, 0.05);
+$black-30: rgba(0, 0, 0, 0.3);
+$black-50: rgba(0, 0, 0, 0.5);
+$black-60: rgba(0, 0, 0, 0.6);
+$black-80: rgba(0, 0, 0, 0.8);
+
+// Semantic text-shadow presets (offset-only; colors combined in mixins)
+$shadow-offset-sm: 2px;
+$shadow-offset-md: 3px;
+$shadow-offset-lg: 4px;
+$shadow-offset-xl: 8px;
+
+// Spacing
+$spacing-xs: 0.5rem;
+$spacing-sm: 1rem;
+$spacing-md: 1.5rem;
+$spacing-lg: 2rem;
+$spacing-xl: 3rem;
+$spacing-xxl: 4rem;
+
+// Border radius
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-full: 9999px;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-base: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Shadows
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+$shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+$shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5);
+
+// Typography
+$font-family:
+  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-family-pixel: "Press Start 2P", monospace;
+
+$font-size-xs: 0.5rem;
+$font-size-sm: 0.625rem;
+$font-size-base: 0.75rem;
+$font-size-lg: 0.875rem;
+$font-size-xl: 1rem;
+$font-size-2xl: 1.25rem;
+$font-size-3xl: 1.5rem;
+$font-size-4xl: 2rem;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Z-index
+$z-dropdown: 1000;
+$z-modal: 2000;
+$z-tooltip: 3000;
+
+// Breakpoints
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
+$breakpoint-desktop: 1280px;

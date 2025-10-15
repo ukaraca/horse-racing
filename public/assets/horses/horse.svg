@@ -1,0 +1,127 @@
+<svg width="64" height="48" viewBox="0 0 64 48" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated;">
+  <defs>
+    <!-- At rengi için mask -->
+    <mask id="horseMask">
+      <rect width="64" height="48" fill="black"/>
+      <g fill="white">
+        <!-- At silueti -->
+        <rect x="40" y="16" width="4" height="4"/>
+        <rect x="44" y="14" width="2" height="2"/>
+        <rect x="44" y="16" width="8" height="6"/>
+        <rect x="52" y="18" width="2" height="2"/>
+        <rect x="38" y="20" width="8" height="8"/>
+        <rect x="20" y="24" width="20" height="10"/>
+        <rect x="18" y="26" width="4" height="6"/>
+      </g>
+    </mask>
+  </defs>
+  
+  <!-- ARKA BACAKLAR (arkada kalan) -->
+  <g id="back-legs-rear">
+    <!-- Arka sağ bacak (arka planda) -->
+    <g id="leg-back-right">
+      <rect x="24" y="34" width="3" height="8" class="horse-fill"/>
+      <rect x="24" y="42" width="4" height="2" fill="#1a1a1a"/>
+    </g>
+  </g>
+  
+  <!-- ÖN BACAKLAR (arkada kalan) -->
+  <g id="front-legs-rear">
+    <!-- Ön sağ bacak (arka planda) -->
+    <g id="leg-front-right">
+      <rect x="36" y="34" width="3" height="10" class="horse-fill"/>
+      <rect x="36" y="44" width="4" height="2" fill="#1a1a1a"/>
+    </g>
+  </g>
+  
+  <!-- AT GÖVDESİ -->
+  <g id="horse-body">
+    <!-- Gövde ana -->
+    <rect x="20" y="24" width="20" height="10" class="horse-fill"/>
+    
+    <!-- Boyun -->
+    <rect x="38" y="20" width="8" height="8" class="horse-fill"/>
+    
+    <!-- Baş -->
+    <rect x="44" y="16" width="8" height="6" class="horse-fill"/>
+    <rect x="52" y="18" width="2" height="2" class="horse-fill"/>
+    
+    <!-- Kulak -->
+    <rect x="46" y="14" width="2" height="2" class="horse-fill"/>
+    
+    <!-- Kuyruk -->
+    <g id="tail" transform-origin="20 28">
+      <rect x="16" y="26" width="4" height="2" class="horse-fill"/>
+      <rect x="14" y="28" width="4" height="2" class="horse-fill"/>
+      <rect x="12" y="30" width="4" height="3" class="horse-fill"/>
+    </g>
+    
+    <!-- Yele -->
+    <rect x="40" y="16" width="4" height="4" fill="#2a2a2a"/>
+    <rect x="44" y="14" width="2" height="2" fill="#2a2a2a"/>
+    
+    <!-- Göz -->
+    <rect x="48" y="18" width="2" height="2" fill="#000"/>
+    
+    <!-- Burun deliği -->
+    <rect x="52" y="20" width="1" height="1" fill="#000"/>
+  </g>
+  
+  <!-- ÖN BACAKLAR (önde) -->
+  <g id="front-legs-front">
+    <!-- Ön sol bacak -->
+    <g id="leg-front-left">
+      <rect x="40" y="34" width="3" height="10" class="horse-fill"/>
+      <rect x="40" y="44" width="4" height="2" fill="#1a1a1a"/>
+    </g>
+  </g>
+  
+  <!-- ARKA BACAKLAR (önde) -->
+  <g id="back-legs-front">
+    <!-- Arka sol bacak -->
+    <g id="leg-back-left">
+      <rect x="28" y="34" width="3" height="8" class="horse-fill"/>
+      <rect x="28" y="42" width="4" height="2" fill="#1a1a1a"/>
+    </g>
+  </g>
+  
+  <!-- JOKEY -->
+  <g id="jockey">
+    <!-- Bacaklar -->
+    <rect x="32" y="22" width="3" height="8" class="jockey-fill"/>
+    <rect x="36" y="22" width="3" height="8" class="jockey-fill"/>
+    
+    <!-- Vücut -->
+    <rect x="32" y="16" width="8" height="8" class="jockey-fill"/>
+    
+    <!-- Kol (dizgin tutuyor) -->
+    <rect x="40" y="18" width="4" height="2" class="jockey-fill"/>
+    
+    <!-- Baş (ten rengi) -->
+    <rect x="34" y="12" width="4" height="4" fill="#f4a460"/>
+    
+    <!-- Kask -->
+    <rect x="34" y="10" width="4" height="3" class="jockey-fill"/>
+    <rect x="33" y="11" width="6" height="2" class="jockey-fill"/>
+    
+    <!-- Gözlük/Vizör -->
+    <rect x="35" y="13" width="2" height="1" fill="#444"/>
+    
+    <!-- Numara (beyaz arka plan) -->
+    <rect x="34" y="18" width="4" height="4" fill="#fff"/>
+    <rect x="34" y="18" width="4" height="4" fill="none" stroke="#000" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Gölge -->
+  <ellipse cx="32" cy="46" rx="16" ry="2" fill="rgba(0,0,0,0.3)"/>
+  
+  <style>
+    .horse-fill {
+      fill: var(--horse-color, #8B4513);
+    }
+    .jockey-fill {
+      fill: var(--jockey-color, #FF0000);
+    }
+  </style>
+</svg>
+
