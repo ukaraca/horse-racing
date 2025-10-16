@@ -144,32 +144,3 @@
     }
   }
 }
-
-// Animation
-@mixin fade-in($duration: $transition-base) {
-  animation: fadeIn $duration ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@mixin slide-up($duration: $transition-base) {
-  animation: slideUp $duration ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}

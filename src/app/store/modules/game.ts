@@ -13,7 +13,7 @@ const state: () => IGameState = () => ({
   surface: null,
   track: null,
   settings: {
-    isMusicEnabled: false,
+    isMusicEnabled: true,
     isSoundEnabled: true,
     isFullscreenEnabled: false,
   },

@@ -9,11 +9,11 @@ import {
   type Config,
 } from "unique-names-generator";
 
-function rand(min: number, max: number) {
+const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+};
 
-function generateHorseName(): string {
+const generateHorseName = (): string => {
   const secondWord = Math.random() > 0.5 ? colors : animals;
 
   const config: Config = {
@@ -23,9 +23,9 @@ function generateHorseName(): string {
   };
 
   return uniqueNamesGenerator(config);
-}
+};
 
-export function generateHorses(count = HORSE_COUNT_TOTAL): IHorse[] {
+const generateHorses = (count = HORSE_COUNT_TOTAL): IHorse[] => {
   const n = Math.min(count, HORSE_COUNT_TOTAL);
   const colorList = generateUniqueColors(n);
   const horses: IHorse[] = [];
@@ -54,4 +54,6 @@ export function generateHorses(count = HORSE_COUNT_TOTAL): IHorse[] {
     });
   }
   return horses;
-}
+};
+
+export { generateHorses, generateHorseName };

@@ -22,3 +22,6 @@ export const TRACK_CONDITION_MULTIPLIER: Record<string, Record<string, number>> 
 
 export const SURFACE_AFFINITY_MIN = 0.9;
 export const SURFACE_AFFINITY_MAX = 1.1;
+
+// Re-export audio constants
+export * from "./audio";

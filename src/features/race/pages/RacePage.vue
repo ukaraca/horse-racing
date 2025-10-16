@@ -1,0 +1,1022 @@
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref, computed, watch } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import Countdown from "../components/Countdown.vue";
+import { useFullscreen } from "@/shared/composables/useFullscreen";
+import { useAudio } from "@/shared/composables/useAudio";
+import type { IRaceHorse, IHorse, ITrackCondition } from "@/shared/types";
+import type { TSurface } from "@/shared/constants";
+import { clamp } from "@/shared/utils";
+import {
+  PX_PER_METER,
+  V_PARALLAX,
+  DELTA_MIN,
+  DELTA_MAX,
+  DELTA_AFFINITY_SCALE,
+  RACE_TICK_MS,
+  FINALIZE_DELAY_MS,
+  SECTION_A_RATIO,
+  SECTION_C_RATIO,
+  TRACK_CONFIG,
+  TRACK_COLORS,
+  type TPhase,
+} from "../constants";
+
+interface TrackMetrics {
+  top: number;
+  height: number;
+  bottom: number;
+  laneCenters: number[];
+  laneHeight: number;
+  horseSize: number;
+}
+
+const store = useStore();
+const router = useRouter();
+const { isFullscreen } = useFullscreen();
+const {
+  isMusicEnabled,
+  isSoundEnabled,
+  initializeAudio,
+  playAudio,
+  stopAudio,
+  playAllRunSounds,
+  stopAllRunSounds,
+} = useAudio();
+
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+const isCountdownComplete = ref(false);
+const raceProgress = ref(0);
+const isParallaxActive = ref(false);
+const hasRaceFinalized = ref(false);
+const isPreRacePhase = ref(false);
+let preRaceAnimationId: number | null = null;
+
+const trackMetrics = ref<TrackMetrics | null>(null);
+const cameraOffset = ref(0);
+const cameraSpeed = ref(0);
+const phase = ref<TPhase>("SCROLL");
+
+// Viewport cache
+const viewportW = ref(0);
+const viewportH = ref(0);
+
+// Tek hız kaynağı: pistin dünya hızı (px/sn)
+const worldTrackSpeed = ref(0);
+const targetTrackSpeed = ref(0);
+
+const surface = computed(() => (store.getters["game/surface"] as TSurface) || "turf");
+const raceState = computed(() => store.getters["game/raceState"]);
+const currentRound = computed(() => store.getters["game/currentRound"]);
+const horses = computed(() => store.getters["game/horses"] as IHorse[]);
+const track = computed(() => store.getters["game/track"] as ITrackCondition);
+const trackLabel = computed(() => {
+  const t = track.value;
+  if (!t) return "Track pending";
+  return `${t.surface} ${t.condition}`;
+});
+const isPaused = computed(() => raceState.value.isPaused);
+const raceHorses = computed(
+  () =>
+    (store.getters["game/currentRaceHorses"] as IRaceHorse[]) || raceState.value.currentRaceHorses,
+);
+const raceDistance = computed(() => raceState.value.raceDistance || 1200);
+
+// Audio settings - now from useAudio composable
+
+const world = ref({ A: 0, B: 0, C: 0, width: 0, startX: 0, finishX: 0, maxOffset: 0 });
+
+let animationFrameId = 0;
+let raceUpdateInterval: number | null = null;
+let finalizeTimeoutId: number | null = null;
+let lastTickTs = 0;
+let rafPrev = 0;
+let raceStartTime = ref(0);
+let runSoundInterval: number | null = null;
+
+const horseDelta = new Map<string, number>();
+const horseLastSpeedPx = new Map<string, number>();
+
+const worldCanvas = document.createElement("canvas");
+const worldCtx = worldCanvas.getContext("2d")!;
+
+const getTrackColors = () =>
+  TRACK_COLORS[surface.value as keyof typeof TRACK_COLORS] || TRACK_COLORS.turf;
+
+function computeTrackMetrics(canvasHeight: number): TrackMetrics {
+  const availableHeight = canvasHeight * 0.7;
+  const laneHeight = Math.round(
+    Math.max(
+      Math.min(availableHeight / TRACK_CONFIG.lanes, TRACK_CONFIG.maxLane),
+      TRACK_CONFIG.minLane,
+    ),
+  );
+  const horseSize = Math.round(laneHeight * 0.75);
+  const trackHeight = TRACK_CONFIG.lanes * laneHeight;
+  const minTop = Math.min(canvasHeight * 0.15, 100);
+  const maxTop = canvasHeight * 0.35;
+  const top = Math.max(minTop, Math.min(maxTop, (canvasHeight - trackHeight) / 2));
+  const bottom = top + trackHeight;
+  const laneCenters = Array.from(
+    { length: TRACK_CONFIG.lanes },
+    (_, i) => top + laneHeight * (i + 0.5),
+  );
+  return { top, height: trackHeight, bottom, laneCenters, laneHeight, horseSize };
+}
+
+function recalcWorld(viewportWidth: number) {
+  const A = Math.round(viewportWidth * SECTION_A_RATIO);
+  const C = Math.round(viewportWidth * SECTION_C_RATIO);
+  const B = Math.max(1, Math.round(raceDistance.value * PX_PER_METER));
+  const width = A + B + C;
+  const startX = A;
+  const finishX = A + B;
+  const maxOffset = Math.max(0, width - viewportWidth);
+  world.value = { A, B, C, width, startX, finishX, maxOffset };
+}
+
+function prerenderWorldTexture(_viewportWidth: number, viewportHeight: number) {
+  worldCanvas.width = world.value.width;
+  worldCanvas.height = viewportHeight;
+  const ctx = worldCtx;
+  const m = trackMetrics.value ?? computeTrackMetrics(viewportHeight);
+  const colors = getTrackColors();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, worldCanvas.width, worldCanvas.height);
+  const sky = ctx.createLinearGradient(0, 0, 0, m.top);
+  sky.addColorStop(0, "#4a90e2");
+  sky.addColorStop(1, TRACK_CONFIG.skyColor);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, worldCanvas.width, m.top);
+  ctx.fillStyle = colors.mountain;
+  const peaks = 18;
+  const peakW = worldCanvas.width / peaks;
+  ctx.beginPath();
+  ctx.moveTo(0, m.top);
+  for (let i = 0; i <= peaks; i++) {
+    const x = i * peakW;
+    const h = Math.sin(i * 0.7) * 60 + 80;
+    ctx.lineTo(x + peakW / 2, m.top - h);
+    ctx.lineTo(x + peakW, m.top);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = colors.ground;
+  ctx.fillRect(0, m.top, worldCanvas.width, worldCanvas.height - m.top);
+  ctx.fillStyle = colors.groundAlt;
+  ctx.fillRect(0, m.top, worldCanvas.width, m.height);
+  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.lineWidth = 2;
+  for (let i = 0; i <= TRACK_CONFIG.lanes; i++) {
+    const y = m.top + i * m.laneHeight;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(worldCanvas.width, y);
+    ctx.stroke();
+  }
+  const postW = 8;
+  const postS = 40;
+  const fh = Math.round(m.laneHeight * 0.6);
+  const fenceRow = (baseY: number) => {
+    for (let x = 0; x < worldCanvas.width + postS; x += postS) {
+      ctx.fillStyle = "#5d4037";
+      ctx.fillRect(x - postW / 2, baseY - fh, postW, fh);
+      ctx.fillStyle = "#6d4c41";
+      ctx.fillRect(x - postW / 2, baseY - fh + 5, postS, 4);
+      ctx.fillRect(x - postW / 2, baseY - fh / 2, postS, 4);
+    }
+  };
+  fenceRow(m.top);
+  fenceRow(m.bottom);
+  const drawMark = (x: number, label: string) => {
+    const xi = Math.round(x);
+    ctx.save();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([12, 6]);
+    ctx.beginPath();
+    ctx.moveTo(xi, m.top);
+    ctx.lineTo(xi, m.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 24px 'Press Start 2P', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(label, xi, m.top - 20);
+    ctx.restore();
+  };
+  drawMark(world.value.startX, "START");
+  drawMark(world.value.finishX, "FINISH");
+}
+
+function render(now = performance.now()) {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d", {
+    alpha: false,
+    desynchronized: true,
+  }) as CanvasRenderingContext2D | null;
+  if (!ctx) return;
+
+  if (!rafPrev) rafPrev = now;
+  const dt = Math.min(0.05, (now - rafPrev) / 1000);
+  rafPrev = now;
+
+  // Hedef hız: SCROLL ve RUNOUT'ta V_PARALLAX, diğer durumlarda 0
+  targetTrackSpeed.value =
+    !isPaused.value &&
+    isParallaxActive.value &&
+    (phase.value === "SCROLL" || phase.value === "RUNOUT")
+      ? V_PARALLAX
+      : 0;
+
+  // pürüzsüz hız (tau ≈ 90ms)
+  const k = 1 - Math.exp(-dt * 11);
+  worldTrackSpeed.value += (targetTrackSpeed.value - worldTrackSpeed.value) * k;
+
+  // Kamera sadece SCROLL'da akar ve pist hızıyla aynı olsun (senkron)
+  if (phase.value === "SCROLL" && isParallaxActive.value && !isPaused.value) {
+    cameraSpeed.value = worldTrackSpeed.value;
+    cameraOffset.value += cameraSpeed.value * dt;
+    if (cameraOffset.value >= world.value.maxOffset) {
+      cameraOffset.value = world.value.maxOffset;
+      cameraSpeed.value = 0;
+      phase.value = "RUNOUT"; // kamera durur, worldTrackSpeed akmaya devam
+      // Keep worldTrackSpeed for smooth horse movement
+      worldTrackSpeed.value = V_PARALLAX;
+    }
+  }
+
+  ctx.setTransform(
+    canvas.width / viewportW.value || 1,
+    0,
+    0,
+    canvas.height / viewportH.value || 1,
+    0,
+    0,
+  );
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(
+    worldCanvas,
+    cameraOffset.value,
+    0,
+    viewportW.value,
+    viewportH.value,
+    0,
+    0,
+    viewportW.value,
+    viewportH.value,
+  );
+
+  animationFrameId = requestAnimationFrame(render);
+}
+
+const getHorseColor = (horseId: string): string => {
+  const horse = horses.value.find((h) => h.id === horseId);
+  return horse?.color ?? "#ccc";
+};
+
+// Audio control functions - now using useAudio composable
+const playCallToPost = () => {
+  playAudio("callToPost");
+};
+
+const playGate = () => {
+  playAudio("gate");
+};
+
+const playAmbience = () => {
+  playAudio("ambience");
+};
+
+const stopAmbience = () => {
+  stopAudio("ambience");
+};
+
+const startRunSoundInterval = () => {
+  if (runSoundInterval) return;
+  runSoundInterval = window.setInterval(() => {
+    if (isSoundEnabled.value && raceState.value.isRaceActive && !isPaused.value) {
+      playAllRunSounds();
+    }
+  }, 3000); // Change run sound every 3 seconds
+};
+
+// Force template re-render during pre-race phase
+const preRaceFrame = ref(0);
+const forcePreRaceUpdate = () => {
+  if (isPreRacePhase.value) {
+    preRaceFrame.value++;
+    requestAnimationFrame(forcePreRaceUpdate);
+  }
+};
+
+const stopPreRaceAnimation = () => {
+  if (preRaceAnimationId) {
+    cancelAnimationFrame(preRaceAnimationId);
+    preRaceAnimationId = null;
+  }
+  // Animation is handled by existing race system
+};
+
+const getHorseStyle = (raceHorse: IRaceHorse) => {
+  const m = trackMetrics.value;
+  if (!m) return { transform: "translate3d(-9999px,-9999px,0)" };
+
+  const idx = raceHorses.value.findIndex((i) => i.horseId === raceHorse.horseId);
+  if (idx === -1) return { transform: "translate3d(-9999px,-9999px,0)" };
+
+  const laneIndex = ((idx % TRACK_CONFIG.lanes) + TRACK_CONFIG.lanes) % TRACK_CONFIG.lanes;
+  const laneY = m.laneCenters[laneIndex] ?? m.top + m.laneHeight / 2;
+
+  let screenX: number;
+  let screenY = laneY - m.horseSize / 2;
+
+  // Pre-race phase: horses move from left to start line over 4 seconds
+  if (isPreRacePhase.value && !isCountdownComplete.value) {
+    const elapsed = (performance.now() - raceStartTime.value) / 1000;
+    if (elapsed < 4) {
+      // First 4 seconds: animate from left edge (0px) to start line
+      const progress = Math.min(elapsed / 4, 1);
+      const startX = 0; // Start from left edge of screen (0px)
+      // End at start line (1/3 viewport - horseSize)
+      const endX = viewportW.value / 3 - m.horseSize;
+      screenX = startX + (endX - startX) * progress;
+    } else {
+      // After 4 seconds: stay at start line
+      screenX = viewportW.value / 3 - m.horseSize;
+    }
+  } else {
+    // Normal race phase
+    const now = performance.now();
+    const dtSinceTick = Math.max(0, (now - lastTickTs) / 1000);
+    const lastPx = horseLastSpeedPx.get(raceHorse.horseId) ?? worldTrackSpeed.value;
+    const extraMeters = (lastPx / PX_PER_METER) * dtSinceTick;
+
+    // Let horses continue past finish line
+    const posMeters = raceHorse.position + extraMeters;
+    const worldX = world.value.startX + posMeters * PX_PER_METER;
+    screenX = worldX - cameraOffset.value;
+  }
+
+  return {
+    transform: `translate3d(${screenX}px, ${screenY}px, 0)`,
+    width: `${m.horseSize}px`,
+    height: `${m.horseSize}px`,
+  };
+};
+
+const togglePause = () => {
+  if (isPaused.value) store.dispatch("game/resumeRace");
+  else store.dispatch("game/pauseRace");
+};
+
+const startRaceUpdate = () => {
+  if (raceUpdateInterval !== null) return;
+  lastTickTs = performance.now();
+  raceUpdateInterval = window.setInterval(updateHorsePositions, RACE_TICK_MS);
+};
+
+const stopRaceUpdate = () => {
+  if (raceUpdateInterval !== null) {
+    clearInterval(raceUpdateInterval);
+    raceUpdateInterval = null;
+  }
+};
+
+const scheduleRaceFinalization = (horsesSnapshot: IRaceHorse[]) => {
+  if (hasRaceFinalized.value || finalizeTimeoutId !== null) return;
+  const snapshot = horsesSnapshot.map((h) => ({ ...h }));
+  finalizeTimeoutId = window.setTimeout(() => {
+    void finalizeRace(snapshot);
+  }, FINALIZE_DELAY_MS);
+};
+
+function seedHorseDeltas() {
+  horseDelta.clear();
+  for (const rh of raceHorses.value) {
+    const r = Math.random();
+    const d = DELTA_MIN + r * (DELTA_MAX - DELTA_MIN);
+    horseDelta.set(rh.horseId, d);
+  }
+}
+
+const updateHorsePositions = () => {
+  if (
+    !raceState.value.isRaceActive ||
+    isPaused.value ||
+    !isCountdownComplete.value ||
+    raceHorses.value.length === 0
+  )
+    return;
+
+  const now = performance.now();
+  const dt = Math.min(0.1, (now - lastTickTs) / 1000);
+  lastTickTs = now;
+
+  const trackSurface = (track.value?.surface as TSurface) || "turf";
+  const updated = raceHorses.value.map((rh: IRaceHorse) => {
+    const h = horses.value.find((x) => x.id === rh.horseId);
+    const baseDelta = horseDelta.get(rh.horseId) ?? 0;
+    const aff = h?.surfaceAffinity?.[trackSurface] ?? 1;
+    const affDelta = (aff - 1) * DELTA_AFFINITY_SCALE;
+    const deltaTotal = baseDelta + affDelta;
+
+    // TEK HIZ KAYNAĞI: dünya pist hızı
+    const worldAdvancePx = worldTrackSpeed.value + deltaTotal;
+
+    horseLastSpeedPx.set(rh.horseId, worldAdvancePx);
+
+    const worldAdvanceMeters = worldAdvancePx / PX_PER_METER;
+
+    let pos = rh.position;
+    let finished = rh.isFinished;
+    let finishTime = rh.finishTime;
+
+    if (!finished) {
+      // Let horses continue past finish line
+      pos = rh.position + worldAdvanceMeters * dt;
+      if (pos >= raceDistance.value) {
+        finished = true;
+        finishTime = finishTime ?? Date.now();
+      }
+    } else {
+      // Keep moving even after finishing
+      pos = rh.position + worldAdvanceMeters * dt;
+    }
+
+    return {
+      ...rh,
+      position: pos,
+      currentSpeed: worldAdvanceMeters,
+      isFinished: finished,
+      finishTime,
+    };
+  });
+
+  const maxPos = updated.length ? Math.max(...updated.map((h) => h.position)) : 0;
+  raceProgress.value = clamp((maxPos / raceDistance.value) * 100, 0, 100);
+
+  store.dispatch("game/updateHorsePositions", updated);
+
+  const allFinished = updated.every((h) => h.isFinished);
+  if (allFinished && !hasRaceFinalized.value) {
+    // All horses have crossed finish line, wait 2 seconds then finalize
+    scheduleRaceFinalization(updated);
+  }
+};
+
+async function finalizeRace(horsesSnapshot: IRaceHorse[]) {
+  if (hasRaceFinalized.value) return;
+  hasRaceFinalized.value = true;
+  if (finalizeTimeoutId !== null) {
+    clearTimeout(finalizeTimeoutId);
+    finalizeTimeoutId = null;
+  }
+
+  // Stop run sounds when race finishes
+  stopAllRunSounds();
+
+  const results = [...horsesSnapshot]
+    .sort((a, b) => {
+      if (a.finishTime && b.finishTime) return a.finishTime - b.finishTime;
+      if (a.finishTime) return -1;
+      if (b.finishTime) return 1;
+      return b.position - a.position;
+    })
+    .map((h) => h.horseId);
+  await store.dispatch("game/finishRace", results);
+  router.push({ name: "race-management" });
+}
+
+function handleCountdownComplete() {
+  isCountdownComplete.value = true;
+  isPreRacePhase.value = false; // End pre-race phase - horses are now at start line
+  if (raceState.value.isRaceActive) {
+    // Gate sound at race start
+    playGate();
+
+    // start'ta ani sıçrama olmasın - but keep minimum speed for smooth movement
+    worldTrackSpeed.value = V_PARALLAX * 0.1; // 10% of target speed for smooth start
+    targetTrackSpeed.value = V_PARALLAX;
+
+    isParallaxActive.value = true;
+    phase.value = "SCROLL";
+    seedHorseDeltas();
+
+    // interpolasyonun baz zamanını sıfırla
+    lastTickTs = performance.now();
+    startRaceUpdate();
+
+    // Start run sounds
+    playAllRunSounds();
+    startRunSoundInterval();
+  }
+}
+
+function resizeCanvas() {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+
+  viewportW.value = w;
+  viewportH.value = h;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = `${w}px`;
+  canvas.style.height = `${h}px`;
+
+  const ctx = canvas.getContext("2d", {
+    alpha: false,
+    desynchronized: true,
+  }) as CanvasRenderingContext2D | null;
+  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  trackMetrics.value = computeTrackMetrics(h);
+  recalcWorld(w);
+  prerenderWorldTexture(w, h);
+
+  cameraOffset.value = 0;
+  cameraSpeed.value = 0;
+
+  // yeniden boyutta hızları sakinleştir
+  worldTrackSpeed.value = 0;
+  targetTrackSpeed.value = 0;
+
+  phase.value = "SCROLL";
+}
+
+watch(
+  () => raceState.value.isRaceActive,
+  (isActive) => {
+    if (isActive) {
+      raceProgress.value = 0;
+      hasRaceFinalized.value = false;
+      isParallaxActive.value = isCountdownComplete.value && !isPaused.value;
+      cameraOffset.value = 0;
+      cameraSpeed.value = 0;
+      // Don't reset worldTrackSpeed here - let handleCountdownComplete set it
+      if (!isCountdownComplete.value) {
+        worldTrackSpeed.value = 0;
+        targetTrackSpeed.value = 0;
+      }
+      phase.value = "SCROLL";
+      seedHorseDeltas();
+      horseLastSpeedPx.clear();
+
+      if (isCountdownComplete.value) {
+        lastTickTs = performance.now();
+        startRaceUpdate();
+      }
+    } else {
+      stopRaceUpdate();
+      isParallaxActive.value = false;
+      cameraOffset.value = 0;
+      cameraSpeed.value = 0;
+      worldTrackSpeed.value = 0;
+      targetTrackSpeed.value = 0;
+      horseLastSpeedPx.clear();
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => isPaused.value,
+  (p) => {
+    if (p) {
+      stopRaceUpdate();
+      targetTrackSpeed.value = 0;
+      // Stop all sounds when paused
+      stopAmbience();
+      stopAllRunSounds();
+    } else if (raceState.value.isRaceActive) {
+      lastTickTs = performance.now();
+      startRaceUpdate();
+      targetTrackSpeed.value = V_PARALLAX;
+      // Resume ambience when unpaused
+      playAmbience();
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => isFullscreen.value,
+  () => {
+    setTimeout(() => resizeCanvas(), 100);
+  },
+);
+
+// Watch for audio settings changes
+watch(
+  () => isMusicEnabled.value,
+  (enabled) => {
+    if (enabled) {
+      playAmbience();
+    } else {
+      stopAmbience();
+    }
+  },
+);
+
+watch(
+  () => isSoundEnabled.value,
+  (enabled) => {
+    if (!enabled) {
+      stopAllRunSounds();
+    }
+  },
+);
+
+onMounted(() => {
+  // Check if race is active, redirect if not
+  if (!raceState.value.isRaceActive) {
+    router.push({ name: "race-management" });
+    return;
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas, { passive: true });
+  document.addEventListener("fullscreenchange", () => setTimeout(resizeCanvas, 100), {
+    passive: true,
+  });
+
+  // Pause when tab loses focus
+  window.addEventListener("blur", () => {
+    if (raceState.value.isRaceActive && !isPaused.value) {
+      store.dispatch("game/pauseRace");
+    }
+  });
+  seedHorseDeltas();
+  render();
+
+  // Initialize audio system
+  initializeAudio();
+  playAmbience();
+  playCallToPost();
+
+  isPreRacePhase.value = true;
+  raceStartTime.value = performance.now();
+  forcePreRaceUpdate();
+  console.log("Pre-race phase started:", {
+    isPreRacePhase: isPreRacePhase.value,
+    raceStartTime: raceStartTime.value,
+    viewportW: viewportW.value,
+  });
+
+  setTimeout(() => {
+    isPreRacePhase.value = false;
+    stopPreRaceAnimation();
+
+    // Set world startX to match animation end position
+    console.log("trackMetrics.value?.horseSize", trackMetrics.value?.horseSize);
+    const startLinePixels = viewportW.value / 3 - trackMetrics.value?.horseSize!;
+    world.value.startX = startLinePixels;
+
+    // Adjust finish line to maintain correct race distance
+    // Finish line should be at the end of the race distance from start line
+    world.value.finishX = world.value.startX + raceDistance.value * PX_PER_METER;
+
+    console.log("World positions:", {
+      startX: world.value.startX,
+      finishX: world.value.finishX,
+      raceDistance: raceDistance.value,
+      pixelsPerMeter: PX_PER_METER,
+    });
+
+    console.log("Pre-race phase ended, countdown should start");
+  }, 4000);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", resizeCanvas);
+  document.removeEventListener("fullscreenchange", () => setTimeout(resizeCanvas, 100));
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  stopRaceUpdate();
+  if (finalizeTimeoutId !== null) clearTimeout(finalizeTimeoutId);
+  cameraOffset.value = 0;
+  cameraSpeed.value = 0;
+  worldTrackSpeed.value = 0;
+  targetTrackSpeed.value = 0;
+
+  // Stop all audio
+  stopAmbience();
+  stopAllRunSounds();
+  stopPreRaceAnimation();
+  if (runSoundInterval) {
+    clearInterval(runSoundInterval);
+    runSoundInterval = null;
+  }
+});
+</script>
+
+<template>
+  <div class="race-track">
+    <canvas ref="canvasRef" class="race-canvas"></canvas>
+
+    <!-- Audio elements removed - now managed by useAudio composable -->
+
+    <div class="race-controls" v-if="raceState.isRaceActive && isCountdownComplete">
+      <button @click="togglePause" class="pause-btn">{{ isPaused ? "Resume" : "Pause" }}</button>
+    </div>
+
+    <div v-if="raceState.isRaceActive" class="race-hud">
+      <div class="hud-info">
+        <div class="hud-round">Round {{ currentRound || "-" }}</div>
+        <div class="hud-track">{{ trackLabel }}</div>
+        <div class="hud-distance">{{ raceDistance }}m</div>
+      </div>
+
+      <div v-if="isCountdownComplete" class="hud-progress">
+        <div class="hud-progress-bar">
+          <div class="hud-progress-fill" :style="{ width: `${raceProgress}%` }"></div>
+          <div class="hud-progress-indicator" :style="{ left: `${raceProgress}%` }"></div>
+        </div>
+        <div class="hud-progress-flag">🏁</div>
+      </div>
+
+      <div v-if="isCountdownComplete" class="hud-standings">
+        <div
+          v-for="standing in [...raceHorses]
+            .sort((a, b) =>
+              a.finishTime && b.finishTime
+                ? a.finishTime - b.finishTime
+                : a.finishTime
+                  ? -1
+                  : b.finishTime
+                    ? 1
+                    : b.position - a.position,
+            )
+            .slice(0, 6)
+            .map((rh, i) => {
+              const h = horses.find((x) => x.id === rh.horseId);
+              return {
+                horseId: rh.horseId,
+                position: i + 1,
+                color: h?.color ?? '#ccc',
+                name: h?.name ?? 'Unknown',
+              };
+            })"
+          :key="standing.horseId"
+          class="standing-chip"
+          :class="{ 'standing-chip--podium': standing.position <= 3 }"
+        >
+          <span class="standing-position">{{ standing.position }}</span>
+          <span class="standing-color" :style="{ backgroundColor: standing.color }"></span>
+          <span class="standing-name">{{ standing.name }}</span>
+          <span class="standing-id">{{ standing.horseId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="raceState.isRaceActive || isPreRacePhase"
+      :key="`horses-${preRaceFrame}`"
+      class="horses-container"
+      :class="{ 'horses-container--paused': isPaused }"
+    >
+      <div
+        v-for="raceHorse in raceHorses"
+        :key="raceHorse.horseId"
+        class="horse-element"
+        :style="getHorseStyle(raceHorse)"
+      >
+        <div
+          class="horse-square"
+          :style="{
+            backgroundColor: getHorseColor(raceHorse.horseId),
+            width: `${trackMetrics?.horseSize || 40}px`,
+            height: `${trackMetrics?.horseSize || 40}px`,
+            fontSize: `${Math.max(10, (trackMetrics?.horseSize || 40) * 0.3)}px`,
+          }"
+        >
+          <span class="horse-id-label">{{ raceHorse.horseId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <Countdown v-if="!isCountdownComplete && !isPreRacePhase" @complete="handleCountdownComplete" />
+  </div>
+</template>
+
+<style scoped lang="scss">
+.race-track {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: $background;
+}
+.race-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.race-controls {
+  position: absolute;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  z-index: 30;
+}
+.pause-btn {
+  padding: $spacing-sm $spacing-md;
+  background: $primary;
+  color: $white;
+  border: 2px solid $black;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 $black-60;
+}
+.pause-btn:hover {
+  background: $primary-dark;
+  transform: translate(2px, 2px);
+}
+.race-hud {
+  position: absolute;
+  top: $spacing-lg;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  background: rgba(0, 0, 0, 0.78);
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-lg;
+  border: 2px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  min-width: 40vw;
+  max-width: calc(100% - 2 * $spacing-md);
+  pointer-events: none;
+}
+.hud-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 140px;
+}
+.hud-round {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $white;
+}
+.hud-track {
+  font-size: $font-size-sm;
+  text-transform: capitalize;
+  color: var(--color-text-secondary);
+}
+.hud-distance {
+  font-size: $font-size-base;
+  color: $gold;
+}
+.hud-progress {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 220px;
+}
+.hud-progress-bar {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hud-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, $primary 0%, $success 100%);
+  transition: width 0.1s linear;
+}
+.hud-progress-indicator {
+  position: absolute;
+  top: -3px;
+  width: 18px;
+  height: 18px;
+  background: $error;
+  border: 2px solid $white;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  transition: left 0.1s linear;
+}
+.hud-progress-flag {
+  font-size: 20px;
+  animation: wave 1s ease-in-out infinite;
+}
+.hud-standings {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  max-width: 40vw;
+  overflow: hidden;
+  flex: 1;
+}
+.standing-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: $radius-full;
+  min-height: 28px;
+  white-space: nowrap;
+  transition: transform $transition-base;
+}
+.standing-chip--podium {
+  border-color: var(--color-primary);
+  transform: scale(1.04);
+}
+.standing-position {
+  width: 20px;
+  height: 20px;
+  border-radius: $radius-sm;
+  background: var(--color-background-light);
+  color: var(--color-text-primary);
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  display: grid;
+  place-items: center;
+}
+.standing-color {
+  width: 14px;
+  height: 14px;
+  border-radius: $radius-sm;
+  border: 1px solid var(--color-border);
+}
+.standing-name {
+  font-size: $font-size-sm;
+  color: var(--color-text-primary);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.standing-id {
+  font-family: monospace;
+  font-size: $font-size-xs;
+  color: var(--color-text-secondary);
+}
+
+.horses-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.horse-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transform: translate3d(-9999px, -9999px, 0);
+  transition: transform 0.12s linear;
+  will-change: transform;
+}
+
+.horse-square {
+  border: 2px solid $white;
+  border-radius: $radius-sm;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-bold;
+  color: $black;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+.horse-id-label {
+  font-family: monospace;
+  font-size: $font-size-sm;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+}
+</style>

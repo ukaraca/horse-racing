@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "vuex";
+import { useStore } from "@/shared/composables";
 import Card from "@/shared/components/ui/Card.vue";
 import type { IHorse } from "@/shared/types";
+import {
+  NO_SCHEDULE_TEXT,
+  PARTICIPANTS_TEXT,
+  ROUND_TEXT,
+  RESULTS_TEXT,
+  COMPLETED_TEXT,
+  PENDING_TEXT,
+} from "../constants/race-management-texts";
 
-const store = useStore();
-const rounds = computed(() => store.getters["game/rounds"]);
-const horses = computed(() => store.getters["game/horses"] as IHorse[]);
+const { getGetter, GAME_GETTERS } = useStore();
+const rounds = computed(() => getGetter(GAME_GETTERS.ROUNDS));
+const horses = computed(() => getGetter(GAME_GETTERS.HORSES));
 
-const getHorseById = (horseId: string): IHorse | undefined => {
-  return horses.value.find((horse: IHorse) => horse.id === horseId);
+const getHorseById = (horseId: string): IHorse => {
+  return horses.value.find((horse: IHorse) => horse.id === horseId)!;
 };
 
 const emit = defineEmits<{
@@ -20,14 +28,14 @@ const emit = defineEmits<{
 <template>
   <div class="race-schedule">
     <div v-if="rounds.length === 0" class="no-schedule">
-      <p>No races scheduled yet. Click "Generate Schedule" to create races.</p>
+      <p>{{ NO_SCHEDULE_TEXT }}</p>
     </div>
 
     <div v-else class="rounds-list">
       <Card v-for="round in rounds" :key="round.id" class="round-card" padding="sm">
         <div class="round-header">
           <div class="round-info">
-            <h3>Round {{ round.id }}</h3>
+            <h3>{{ ROUND_TEXT }} {{ round.id }}</h3>
             <div class="round-details">
               <span class="distance">{{ round.distance }}m</span>
               <span class="surface">{{ round.surface }}</span>
@@ -39,44 +47,44 @@ const emit = defineEmits<{
               class="status-badge"
               :class="{ 'status-completed': round.result, 'status-pending': !round.result }"
             >
-              {{ round.result ? "Completed" : "Pending" }}
+              {{ round.result ? COMPLETED_TEXT : PENDING_TEXT }}
             </span>
             <button v-if="round.result" @click="emit('showResults', round.id)" class="results-btn">
-              Results
+              {{ RESULTS_TEXT }}
             </button>
           </div>
         </div>
 
         <div class="participants">
-          <h4>Participants ({{ round.participants.length }})</h4>
+          <h4>{{ PARTICIPANTS_TEXT }} ({{ round.participants.length }})</h4>
           <div class="horses-list">
             <div v-for="horseId in round.participants" :key="horseId" class="participant-horse">
               <div
                 class="horse-color-indicator"
                 :style="{
-                  backgroundColor: getHorseById(horseId)?.color || '#ccc',
+                  backgroundColor: getHorseById(horseId).color,
                 }"
               ></div>
               <span class="horse-name">
-                {{ getHorseById(horseId)?.name || "Unknown" }}
+                {{ getHorseById(horseId).name }}
               </span>
             </div>
           </div>
         </div>
 
         <div v-if="round.result" class="results">
-          <h4>Results</h4>
+          <h4>{{ RESULTS_TEXT }}</h4>
           <div class="results-list">
             <div v-for="(horseId, index) in round.result" :key="horseId" class="result-item">
               <span class="position">{{ index + 1 }}.</span>
               <div
                 class="horse-color-indicator"
                 :style="{
-                  backgroundColor: getHorseById(horseId)?.color || '#ccc',
+                  backgroundColor: getHorseById(horseId).color,
                 }"
               ></div>
               <span class="horse-name">
-                {{ getHorseById(horseId)?.name || "Unknown" }}
+                {{ getHorseById(horseId).name }}
               </span>
             </div>
           </div>

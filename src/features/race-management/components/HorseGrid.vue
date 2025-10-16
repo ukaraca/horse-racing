@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { IHorse } from "@/utils/types";
+import type { IHorse } from "@/shared/types";
 import HorseCard from "./HorseCard.vue";
 
 interface Props {
   horses: IHorse[];
 }
 
-defineProps<Props>();
+const { horses } = defineProps<Props>();
 </script>
 
 <template>
@@ -20,7 +20,7 @@ defineProps<Props>();
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: $spacing-lg;
-  animation: fadeInUp 0.6s ease-out;
+  @include fade-in-up(0.6s);
 
   @include mobile {
     grid-template-columns: 1fr;
@@ -37,17 +37,6 @@ defineProps<Props>();
 
   @include large-desktop {
     grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>

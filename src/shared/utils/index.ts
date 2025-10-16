@@ -14,3 +14,6 @@ export function randInt(min: number, max: number) {
 export function pick<T>(arr: readonly T[]): T {
   return arr[randInt(0, arr.length - 1)]!;
 }
+
+// Re-export position utilities
+export * from "./position";

@@ -1,22 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { ROUTE_NAMES, ROUTE_PATHS } from "./routes";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
-      name: "landing",
-      component: () => import("@/features/landing/LandingScreen.vue"),
+      path: ROUTE_PATHS.LANDING,
+      name: ROUTE_NAMES.LANDING,
+      component: () => import("@/features/landing/pages/LandingPage.vue"),
     },
     {
-      path: "/race-management",
-      name: "race-management",
-      component: () => import("@/features/horses/HorseList.vue"),
+      path: ROUTE_PATHS.RACE_MANAGEMENT,
+      name: ROUTE_NAMES.RACE_MANAGEMENT,
+      component: () => import("@/features/race-management/page/RaceManagementPage.vue"),
     },
     {
-      path: "/race",
-      name: "race",
-      component: () => import("@/features/race/RaceTrack.vue"),
+      path: ROUTE_PATHS.RACE,
+      name: ROUTE_NAMES.RACE,
+      component: () => import("@/features/race/pages/RacePage.vue"),
     },
   ],
 });

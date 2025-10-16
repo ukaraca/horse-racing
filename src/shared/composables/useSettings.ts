@@ -1,24 +1,24 @@
 import { computed } from "vue";
-import { useStore } from "vuex";
+import { useStore } from "@/shared/composables";
 
 export function useSettings() {
-  const store = useStore();
+  const { getGetter, dispatchAction, GAME_GETTERS, GAME_ACTIONS } = useStore();
 
-  const settings = computed(() => store.getters["game/settings"]);
-  const isMusicEnabled = computed(() => store.getters["game/isMusicEnabled"]);
-  const isSoundEnabled = computed(() => store.getters["game/isSoundEnabled"]);
-  const isFullscreenEnabled = computed(() => store.getters["game/isFullscreenEnabled"]);
+  const settings = computed(() => getGetter(GAME_GETTERS.SETTINGS));
+  const isMusicEnabled = computed(() => getGetter(GAME_GETTERS.IS_MUSIC_ENABLED));
+  const isSoundEnabled = computed(() => getGetter(GAME_GETTERS.IS_SOUND_ENABLED));
+  const isFullscreenEnabled = computed(() => getGetter(GAME_GETTERS.IS_FULLSCREEN_ENABLED));
 
   const toggleMusic = () => {
-    store.dispatch("game/toggleMusic");
+    dispatchAction(GAME_ACTIONS.TOGGLE_MUSIC);
   };
 
   const toggleSound = () => {
-    store.dispatch("game/toggleSound");
+    dispatchAction(GAME_ACTIONS.TOGGLE_SOUND);
   };
 
   const toggleFullscreen = () => {
-    store.dispatch("game/toggleFullscreen");
+    dispatchAction(GAME_ACTIONS.TOGGLE_FULLSCREEN);
   };
 
   return {
