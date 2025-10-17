@@ -15,8 +15,8 @@ export function useAudio() {
 
   const audioTracks = ref<Map<AudioKey, AudioTrack>>(new Map());
 
-  const isMusicEnabled = computed(() => getGetter(GAME_GETTERS.IS_MUSIC_ENABLED));
-  const isSoundEnabled = computed(() => getGetter(GAME_GETTERS.IS_SOUND_ENABLED));
+  const isMusicEnabled = computed<boolean>(() => getGetter<boolean>(GAME_GETTERS.IS_MUSIC_ENABLED));
+  const isSoundEnabled = computed<boolean>(() => getGetter<boolean>(GAME_GETTERS.IS_SOUND_ENABLED));
 
   const createAudio = (
     src: string,

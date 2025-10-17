@@ -125,6 +125,11 @@ onMounted(async () => {
     margin: 0;
     @include pixel-text-shadow($black, rgba(0, 0, 0, 0.5), $shadow-offset-lg, $shadow-offset-xl);
   }
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
 }
 
 .race-header-buttons {

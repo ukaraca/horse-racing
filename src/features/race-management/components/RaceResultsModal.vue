@@ -97,6 +97,12 @@ const handleClose = () => {
   border: 1px solid var(--color-border);
   transition: transform 0.2s ease;
 
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
+
   &:hover {
     transform: translateY(-2px);
     border-color: var(--color-primary);

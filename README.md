@@ -1,107 +1,142 @@
 # Horse Racing Game
 
-A modern, interactive horse racing game built with Vue 3, TypeScript, and Vuex.
+An interactive horse racing simulation built with Vue 3 and TypeScript.
 
-## 🎯 Project Overview
+## 🎯 Overview
 
-This project is a front-end case study for an interactive horse racing simulation. The game features dynamic horse generation, race scheduling with multiple rounds, animated races, and comprehensive results tracking.
+The app demonstrates a feature-oriented Vue architecture, deterministic data generation for horses and races, canvas-driven race rendering, and a clean UI layer with reusable components. It includes unit tests (Vitest) and E2E tests (Cypress) with coverage output.
 
-## 🚀 Technologies
+## 🚀 Tech Stack
 
-- **Vue 3** - Progressive JavaScript framework with Composition API
-- **TypeScript** - Type-safe development
-- **Vuex 4** - State management
-- **Vite** - Next-generation frontend tooling
-- **SCSS** - Enhanced CSS with variables and mixins
+- **Vue 3** (Composition API)
+- **TypeScript**
+- **Vuex 4** for state management
+- **Vue Router 4** for routing
+- **Vite 7** for dev/build tooling
+- **SCSS** for styling
+- **Vitest** + **@vue/test-utils** for unit testing
+- **Cypress 13** for E2E testing
 
-## 📋 Features
+## 📦 Getting Started
 
-### Phase 1 (Current)
+1. Install dependencies:
 
-- ✅ Landing screen with play functionality
-- ✅ Settings panel (music, sound effects, fullscreen)
-- ✅ Random horse generation (20 horses with unique names and colors)
-- ✅ Horse list display with condition scores
+   ```bash
+   npm install
+   ```
 
-### Phase 2 (Upcoming)
+2. Start the dev server:
 
-- 🔄 Race schedule generation (6 rounds)
-- 🔄 Animated horse racing with Canvas background
-- 🔄 Parallax scrolling backgrounds (3 track types: dirt, turf, hybrid)
-- 🔄 SVG horse animations with running legs
-- 🔄 Fatigue/condition system
-- 🔄 Race results table
+   ```bash
+   npm run dev
+   ```
 
-## 🏗️ Project Structure
+   App runs at `http://localhost:5173`.
+
+3. Build for production:
+
+   ```bash
+   npm run build
+   ```
+
+4. Preview production build:
+
+   ```bash
+   npm run preview
+   ```
+
+## 🧪 Quality & Testing
+
+- Run unit tests and coverage:
+
+  ```bash
+  npm run test
+  ```
+
+  Coverage artifacts are emitted under `coverage/`.
+
+- Open Cypress (E2E):
+
+  ```bash
+  npm run cy:open
+  ```
+
+- Headless Cypress run:
+
+  ```bash
+  npm run cy:run
+  ```
+
+## 🧭 Scripts
+
+| Script  | Description                     |
+| ------- | ------------------------------- |
+| dev     | Start Vite dev server           |
+| build   | Type-check and build production |
+| preview | Preview production build        |
+| lint    | Run ESLint on project           |
+| test    | Run Vitest with coverage        |
+| cy:open | Open Cypress test runner        |
+| cy:run  | Run Cypress e2e tests headless  |
+
+## 🏗️ Project Structure (High-level)
 
 ```
 src/
-├── features/              # Feature-based modules
-│   ├── landing/          # Landing screen
-│   ├── horses/           # Horse list and cards
-│   └── settings/         # Settings panel
-├── components/
-│   ├── base/             # Reusable UI components
-│   └── layout/           # Layout components
-├── composables/          # Vue composables (Composition API)
-├── store/                # Vuex store modules
-├── generators/           # Data generators (horses, rounds)
-├── constants/            # App constants
-├── styles/               # Global SCSS styles
-└── utils/                # Utility functions and types
+├── app/
+│   ├── router/                 # Routes and router setup
+│   └── store/                  # Vuex store (modules, actions, getters)
+├── features/
+│   ├── landing/                # Landing page
+│   ├── race/                   # Race UI, canvas renderer, engine, utils
+│   ├── race-management/        # Scheduling, results, management UI
+│   └── settings/               # Settings UI (audio, fullscreen)
+├── generators/                 # Data generators (e.g., horses)
+├── shared/                     # Reusable UI, composables, styles, types
+└── test/                       # Test setup
 ```
 
-## 📦 Installation
+## 📋 Current Capabilities (Phase 1)
 
-```bash
-npm install
-```
+- Landing screen with play CTA
+- Settings panel (music, SFX, fullscreen)
+- Random horse generation (unique names, colors)
+- Horse list with condition scores
+- Race page with canvas-based HUD and rendering scaffolding
+- Race management UI for scheduling and results modals
+- Surface-based performance: each horse has per-surface affinity that affects speed
+- Route-level code splitting with dynamic imports (lazy-loaded pages)
+- Horse visuals: temporary SVG icon used for horses (to be replaced with sprites in Phase 2)
 
-## 🎮 Development
+## 🧭 Known Issues
 
-```bash
-npm run dev
-```
+- Window resize bug: canvas/layout does not reflow correctly on `resize` and needs a proper responsive recalculation.
 
-The application will be available at `http://localhost:5173`
+## 🗺️ Phase 2 Roadmap
 
-## 🏁 Build
+- Fix resize behavior on window `resize` (responsive canvas/layout recalculation)
+- Canvas scene to use tiles and sprite-based rendering for track and horses
+- Replace horse SVG with pixel-art sprite sheets and running animations
+- Horse attributes panel: expose horse properties and stats in UI
+- Mobile view improvements (responsive layout, touch targets, typography)
+- Performance polish: offscreen canvas where applicable, sprite sheet optimization
+- Race results enhancements and persistence hooks (optional local storage)
+- Progressive chunking improvements (split vendor/chunks further if needed)
 
-```bash
-npm run build
-```
+## 🎨 Design & Engineering Notes
 
-## 📐 Game Rules
+- Feature-based modularity for scalability and isolation
+- Clear separation of concerns between rendering (canvas), state (Vuex), and UI (Vue components)
+- Strong typing across modules and utilities
+- Linting (ESLint) and formatting (Prettier) configured
+- Horses include `surfaceAffinity` per track surface; this feeds both the race engine tick and the pre-race speed model.
+- Pages are lazy-loaded via dynamic `import()` which enables per-route code splitting (smaller initial bundle, faster TTI).
 
-- **Total Horses**: 20 horses with unique colors and names
-- **Condition Score**: Each horse has a condition score (1-100)
-- **Race Schedule**: 6 rounds at different distances
-  - Round 1: 1200m
-  - Round 2: 1400m
-  - Round 3: 1600m
-  - Round 4: 1800m
-  - Round 5: 2000m
-  - Round 6: 2200m
-- **Participants**: 10 random horses per round
-- **Track Types**: Dirt, Turf, Hybrid (each affects horse performance)
+## 📐 Game Rules (Reference)
 
-## 🎨 Design Principles
-
-- **SOLID Principles**: Clean, maintainable, and scalable code
-- **Component-Based Architecture**: Reusable and isolated components
-- **Feature-Based Organization**: Easy to navigate and extend
-- **Type Safety**: Full TypeScript coverage
-
-## 👨‍💻 Development Notes
-
-This project demonstrates:
-
-- Modern Vue 3 best practices with `<script setup>`
-- Effective state management with Vuex
-- Clean separation of concerns
-- Scalable folder structure
-- Professional code organization
+- 20 horses, each with unique color and name
+- Condition score per horse (1–100)
+- 6 rounds at distances 1200m, 1400m, 1600m, 1800m, 2000m, 2200m
+- 10 random participants per round; track types: Dirt, Turf, Hybrid
 
 ---
-
-Built with ❤️ for the Front-End Case Study

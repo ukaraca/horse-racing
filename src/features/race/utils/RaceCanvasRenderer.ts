@@ -248,54 +248,48 @@ export class RaceCanvasRenderer {
   }
 
   render(canvas: HTMLCanvasElement) {
-    try {
-      if (
-        !this.cachedContext ||
-        canvas.width !== this.lastCanvasSize.width ||
-        canvas.height !== this.lastCanvasSize.height
-      ) {
-        this.cachedContext = canvas.getContext("2d", {
-          alpha: false,
-          desynchronized: true,
-        }) as CanvasRenderingContext2D | null;
-        this.lastCanvasSize = { width: canvas.width, height: canvas.height };
-      }
-
-      const ctx = this.cachedContext;
-      if (!ctx) return;
-
-      this.updatePhysics();
-
-      ctx.setTransform(
-        canvas.width / this.state.viewportW || 1,
-        0,
-        0,
-        canvas.height / this.state.viewportH || 1,
-        0,
-        0,
-      );
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(
-        this.worldCanvas,
-        this.state.cameraOffset,
-        0,
-        this.state.viewportW,
-        this.state.viewportH,
-        0,
-        0,
-        this.state.viewportW,
-        this.state.viewportH,
-      );
-
-      this.state.animationFrameId = requestAnimationFrame(() => {
-        this.render(canvas);
-      });
-    } catch (error) {
-      console.warn("Rendering error:", error);
-      // Stop the animation loop on error
-      this.stopRender();
+    if (
+      !this.cachedContext ||
+      canvas.width !== this.lastCanvasSize.width ||
+      canvas.height !== this.lastCanvasSize.height
+    ) {
+      this.cachedContext = canvas.getContext("2d", {
+        alpha: false,
+        desynchronized: true,
+      }) as CanvasRenderingContext2D | null;
+      this.lastCanvasSize = { width: canvas.width, height: canvas.height };
     }
+
+    const ctx = this.cachedContext;
+    if (!ctx) return;
+
+    this.updatePhysics();
+
+    ctx.setTransform(
+      canvas.width / this.state.viewportW || 1,
+      0,
+      0,
+      canvas.height / this.state.viewportH || 1,
+      0,
+      0,
+    );
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(
+      this.worldCanvas,
+      this.state.cameraOffset,
+      0,
+      this.state.viewportW,
+      this.state.viewportH,
+      0,
+      0,
+      this.state.viewportW,
+      this.state.viewportH,
+    );
+
+    this.state.animationFrameId = requestAnimationFrame(() => {
+      this.render(canvas);
+    });
   }
 
   startRender(canvas: HTMLCanvasElement) {

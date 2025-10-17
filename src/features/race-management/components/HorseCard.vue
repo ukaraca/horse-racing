@@ -68,6 +68,12 @@ const conditionColor = computed(() => {
       4px 4px 0 $black-30,
       2px 2px 0 $primary;
   }
+
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
 }
 
 .horse-header {

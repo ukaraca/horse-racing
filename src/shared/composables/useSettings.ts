@@ -1,14 +1,17 @@
 import { computed } from "vue";
 
 import { useStore } from "@/shared/composables";
+import type { ISettings } from "@/shared/types";
 
 export function useSettings() {
   const { getGetter, dispatchAction, GAME_GETTERS, GAME_ACTIONS } = useStore();
 
-  const settings = computed(() => getGetter(GAME_GETTERS.SETTINGS));
-  const isMusicEnabled = computed(() => getGetter(GAME_GETTERS.IS_MUSIC_ENABLED));
-  const isSoundEnabled = computed(() => getGetter(GAME_GETTERS.IS_SOUND_ENABLED));
-  const isFullscreenEnabled = computed(() => getGetter(GAME_GETTERS.IS_FULLSCREEN_ENABLED));
+  const settings = computed<ISettings>(() => getGetter<ISettings>(GAME_GETTERS.SETTINGS));
+  const isMusicEnabled = computed<boolean>(() => getGetter<boolean>(GAME_GETTERS.IS_MUSIC_ENABLED));
+  const isSoundEnabled = computed<boolean>(() => getGetter<boolean>(GAME_GETTERS.IS_SOUND_ENABLED));
+  const isFullscreenEnabled = computed<boolean>(() =>
+    getGetter<boolean>(GAME_GETTERS.IS_FULLSCREEN_ENABLED),
+  );
 
   const toggleMusic = () => {
     dispatchAction(GAME_ACTIONS.TOGGLE_MUSIC);

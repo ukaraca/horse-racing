@@ -148,6 +148,12 @@ const emit = defineEmits<{
   align-items: flex-start;
   margin-bottom: $spacing-md;
 
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
+
   .round-info {
     h3 {
       margin: 0 0 $spacing-xs 0;

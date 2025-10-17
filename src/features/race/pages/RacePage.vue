@@ -6,9 +6,10 @@ import { useStore as useVuexStore } from "vuex";
 import { PauseIcon, PlayIcon } from "@/shared/components/ui/icons";
 import { useAudio, useFullscreen, useNavigation, useStore } from "@/shared/composables";
 import type { AudioKey, TSurface } from "@/shared/constants";
-import type { IHorse, IRaceHorse } from "@/shared/types";
+import type { IHorse, IRaceHorse, IRaceState } from "@/shared/types";
 
 import { Countdown, RaceHud } from "../components";
+import HorseIcon from "../components/HorseIcon.vue";
 import { PX_PER_METER } from "../constants";
 import {
   RaceCanvasRenderer,
@@ -76,8 +77,8 @@ const audioManager = new RacePageAudioManager({
   playAllRunSounds: () => playAllRunSounds(),
   stopAllRunSounds: () => stopAllRunSounds(),
   initializeAudio: () => initializeAudio(),
-  isMusicEnabled: () => isMusicEnabled.value,
-  isSoundEnabled: () => isSoundEnabled.value,
+  isMusicEnabled: () => isMusicEnabled.value as boolean,
+  isSoundEnabled: () => isSoundEnabled.value as boolean,
   getRaceState: () => raceState.value,
   getIsPaused: () => isPaused.value,
 });
@@ -103,17 +104,17 @@ const isPreRacePhase = ref(false);
 let preRaceAnimationId: number | null = null;
 
 const surface = computed(() => (getGetter(GAME_GETTERS.SURFACE) as TSurface) || "turf");
-const raceState = computed(() => getGetter(GAME_GETTERS.RACE_STATE));
+const raceState = computed<IRaceState>(() => getGetter<IRaceState>(GAME_GETTERS.RACE_STATE));
 
 const horses = computed(() => getGetter(GAME_GETTERS.HORSES) as IHorse[]);
 
-const isPaused = computed(() => raceState.value.isPaused);
-const raceHorses = computed(
+const isPaused = computed<boolean>(() => raceState.value.isPaused);
+const raceHorses = computed<IRaceHorse[]>(
   () =>
     (getGetter(GAME_GETTERS.CURRENT_RACE_HORSES) as IRaceHorse[]) ||
     raceState.value.currentRaceHorses,
 );
-const raceDistance = computed(() => raceState.value.raceDistance || 1200);
+const raceDistance = computed<number>(() => raceState.value.raceDistance || 1200);
 
 const hudRenderData = computed(() => pageRenderer.getHudRenderData());
 const raceControlsRenderData = computed(() => pageRenderer.getRaceControlsRenderData());
@@ -128,6 +129,7 @@ const startRunSoundInterval = () => {
 };
 
 const preRaceFrame = ref(0);
+
 const forcePreRaceUpdate = () => {
   if (isPreRacePhase.value) {
     preRaceFrame.value++;
@@ -286,17 +288,11 @@ onUnmounted(() => {
         class="horse-element"
         :style="getHorseStyle(raceHorse)"
       >
-        <div
-          class="horse-square"
-          :style="{
-            backgroundColor: getHorseColor(raceHorse.horseId),
-            width: `${canvasRenderer.trackMetricsData?.horseSize || 40}px`,
-            height: `${canvasRenderer.trackMetricsData?.horseSize || 40}px`,
-            fontSize: `${Math.max(10, (canvasRenderer.trackMetricsData?.horseSize || 40) * 0.3)}px`,
-          }"
-        >
-          <span class="horse-id-label">{{ raceHorse.horseId }}</span>
-        </div>
+        <HorseIcon
+          :size="80"
+          class="horse-svg"
+          :style="{ color: getHorseColor(raceHorse.horseId) }"
+        />
       </div>
     </div>
 
@@ -326,6 +322,10 @@ onUnmounted(() => {
   top: 6rem;
   right: $spacing-lg;
   z-index: 30;
+  @include mobile {
+    top: 5rem;
+    right: $spacing-md;
+  }
 }
 .pause-btn {
   width: 48px;
@@ -340,6 +340,15 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   transition: all 0.1s ease;
+  @include mobile {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 }
 .pause-btn:hover {
   background: $primary-dark;
@@ -367,17 +376,10 @@ onUnmounted(() => {
   will-change: transform;
 }
 
-.horse-square {
-  border: 2px solid $white;
-  border-radius: $radius-sm;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: $font-weight-bold;
-  color: $black;
-  text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+.horse-svg {
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
 }
 .horse-id-label {
   font-family: monospace;
