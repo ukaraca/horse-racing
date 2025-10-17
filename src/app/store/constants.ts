@@ -7,6 +7,11 @@ export const STORE_MODULES = {
   GAME: "game",
 } as const;
 
+// localStorage keys
+export const LOCALSTORAGE_KEYS = {
+  SETTINGS: "horse-racing-settings",
+} as const;
+
 // Game module getters
 export const GAME_GETTERS = {
   HORSES: "game/horses",
@@ -46,25 +51,8 @@ export const GAME_ACTIONS = {
   RESET_GAME: "game/resetGame",
 } as const;
 
-// Game module mutations
-export const GAME_MUTATIONS = {
-  SET_HORSES: "game/SET_HORSES",
-  SET_ROUNDS: "game/SET_ROUNDS",
-  SET_RESULTS: "game/SET_RESULTS",
-  SET_IS_GENERATED: "game/SET_IS_GENERATED",
-  SET_IS_RACING: "game/SET_IS_RACING",
-  SET_CURRENT_ROUND: "game/SET_CURRENT_ROUND",
-  SET_SURFACE: "game/SET_SURFACE",
-  SET_TRACK: "game/SET_TRACK",
-  SET_SETTINGS: "game/SET_SETTINGS",
-  SET_RACE_STATE: "game/SET_RACE_STATE",
-  SET_LAST_FINISHED_ROUND_ID: "game/SET_LAST_FINISHED_ROUND_ID",
-  SET_GRAND_FINAL_RESULTS: "game/SET_GRAND_FINAL_RESULTS",
-  SET_ROUND_POINTS: "game/SET_ROUND_POINTS",
-} as const;
-
 // Types for type safety
 export type StoreModule = (typeof STORE_MODULES)[keyof typeof STORE_MODULES];
 export type GameGetter = (typeof GAME_GETTERS)[keyof typeof GAME_GETTERS];
 export type GameAction = (typeof GAME_ACTIONS)[keyof typeof GAME_ACTIONS];
-export type GameMutation = (typeof GAME_MUTATIONS)[keyof typeof GAME_MUTATIONS];
+export type LocalStorageKey = (typeof LOCALSTORAGE_KEYS)[keyof typeof LOCALSTORAGE_KEYS];

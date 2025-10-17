@@ -50,7 +50,7 @@ const generateHorses = (count = HORSE_COUNT_TOTAL): IHorse[] => {
       baseCondition: base,
       currentCondition: base,
       surfaceAffinity: affinity,
-      lastRaceRound: undefined, // Initially no races
+      lastRaceRound: undefined,
     });
   }
   return horses;

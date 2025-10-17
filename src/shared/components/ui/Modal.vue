@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { CLOSE_TEXT } from "@/shared/constants/ui-texts";
+
 interface Props {
   modelValue: boolean;
   title?: string;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
 }>();
@@ -27,7 +29,7 @@ const handleBackdropClick = (event: MouseEvent) => {
         <div class="modal-content">
           <div v-if="title" class="modal-header">
             <h2 class="modal-title">{{ title }}</h2>
-            <button class="close-btn" @click="close" aria-label="Close">
+            <button class="close-btn" @click="close" :aria-label="CLOSE_TEXT">
               <span class="pixel-close-x"></span>
             </button>
           </div>
@@ -90,12 +92,12 @@ const handleBackdropClick = (event: MouseEvent) => {
   width: 32px;
   height: 32px;
   @include flex-center;
-  border-radius: 6px; // Pixel art için keskin köşeler
+  border-radius: 6px;
   color: $white;
   border: 2px solid $white;
   background: transparent;
-  transition: all 0.15s ease; // Daha hızlı animasyon
-  @include pixelated; // Pixel art mixin
+  transition: all 0.15s ease;
+  @include pixelated;
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -148,7 +150,6 @@ const handleBackdropClick = (event: MouseEvent) => {
   }
 }
 
-// Transition animations
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity $transition-base;

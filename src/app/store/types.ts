@@ -52,38 +52,42 @@ export interface IGameMutations {
 
 export interface IGameActions {
   [key: string]: any;
-  generateHorses(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  generateHorses(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
   generateRandomTrack(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
   ): Promise<ITrackCondition>;
-  generateRaceSchedule(context: ActionContext<IGameState, Record<string, any>>): Promise<IRound[]>;
-  toggleMusic(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
-  toggleSound(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
-  toggleFullscreen(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  generateRaceSchedule(
+    context: ActionContext<IGameState, Record<string, unknown>>,
+  ): Promise<IRound[]>;
+  toggleMusic(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
+  toggleSound(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
+  toggleFullscreen(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
   updateSettings(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
     settings: Partial<ISettings>,
   ): Promise<void>;
-  resetGame(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  resetGame(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
   startRace(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
     roundId: number,
   ): Promise<void>;
-  pauseRace(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
-  resumeRace(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  pauseRace(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
+  resumeRace(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
   finishRace(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
     results: string[],
   ): Promise<void>;
   updateHorsePositions(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
     positions: IRaceHorse[],
   ): Promise<void>;
-  nextRound(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  nextRound(context: ActionContext<IGameState, Record<string, unknown>>): Promise<void>;
   calculateGrandFinalResults(
-    context: ActionContext<IGameState, Record<string, any>>,
+    context: ActionContext<IGameState, Record<string, unknown>>,
   ): Promise<void>;
-  clearLastFinishedRound(context: ActionContext<IGameState, Record<string, any>>): Promise<void>;
+  clearLastFinishedRound(
+    context: ActionContext<IGameState, Record<string, unknown>>,
+  ): Promise<void>;
 }
 
 export interface IGameGetters {

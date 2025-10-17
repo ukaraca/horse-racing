@@ -56,7 +56,7 @@ export function useNavigation() {
     goForward,
     replaceRoute,
     replaceRoutePath,
-    // Export route constants for convenience
+
     ROUTE_NAMES,
     ROUTE_PATHS,
   };

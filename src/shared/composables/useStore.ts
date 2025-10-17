@@ -1,13 +1,12 @@
 import { useStore as vuexUseStore } from "vuex";
 import type { Store } from "vuex";
 import type { IGameState } from "@/app/store/types";
+import type { PayloadType } from "@/shared/types/store";
 import {
   GAME_GETTERS,
   GAME_ACTIONS,
-  GAME_MUTATIONS,
   type GameGetter,
   type GameAction,
-  type GameMutation,
 } from "@/app/store/constants";
 
 /**
@@ -26,34 +25,22 @@ export function useStore() {
   /**
    * Type-safe action dispatch
    */
-  const dispatchAction = (action: GameAction, payload?: any) => {
+  const dispatchAction = (action: GameAction, payload?: PayloadType) => {
     return store.dispatch(action, payload);
   };
 
   /**
    * Type-safe mutation commit
    */
-  const commitMutation = (mutation: GameMutation, payload?: any) => {
-    return store.commit(mutation, payload);
-  };
-
   return {
-    // Original store instance
     store,
-
-    // Type-safe methods
     getGetter,
     dispatchAction,
-    commitMutation,
-
-    // Direct access to getters for convenience
     getters: store.getters,
     dispatch: store.dispatch,
     commit: store.commit,
 
-    // Export constants for convenience
     GAME_GETTERS,
     GAME_ACTIONS,
-    GAME_MUTATIONS,
   };
 }

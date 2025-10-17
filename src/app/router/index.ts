@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: ROUTE_PATHS.RACE_MANAGEMENT,
       name: ROUTE_NAMES.RACE_MANAGEMENT,
-      component: () => import("@/features/race-management/page/RaceManagementPage.vue"),
+      component: () => import("@/features/race-management/pages/RaceManagementPage.vue"),
     },
     {
       path: ROUTE_PATHS.RACE,

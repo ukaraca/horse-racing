@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ITEMS_TEXT } from "@/shared/constants/ui-texts";
+
 interface Props {
   title: string;
   count?: number;
@@ -13,7 +15,7 @@ defineProps<Props>();
     <h1 class="page-title">{{ title }}</h1>
     <div v-if="count !== undefined" class="page-count">
       <span class="count-number">{{ count }}</span>
-      <span class="count-label">{{ countLabel || "Items" }}</span>
+      <span class="count-label">{{ countLabel || ITEMS_TEXT }}</span>
     </div>
   </div>
 </template>

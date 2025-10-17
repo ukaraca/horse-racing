@@ -65,5 +65,5 @@ export interface IGrandFinalResults {
 
 export interface IRoundPoints {
   roundId: number;
-  horsePoints: Record<string, number>; // horseId -> points
+  horsePoints: Record<string, number>;
 }

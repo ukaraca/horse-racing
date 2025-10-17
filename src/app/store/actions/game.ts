@@ -56,7 +56,7 @@ const calculateHorseSpeed = (horse: IHorse, track: ITrackCondition): number => {
   const affinityMultiplier = affinityToMul(affinityValue, 0.92, 1.12);
 
   const trackMultiplier = TRACK_CONDITION_MULTIPLIER[track.surface]?.[track.condition] ?? 1.0;
-  const randomness = 0.99 + Math.random() * 0.03; // 0.99 - 1.02
+  const randomness = 0.99 + Math.random() * 0.03;
 
   const speed = conditionSpeed * affinityMultiplier * trackMultiplier * randomness;
   const scaledSpeed = speed * SPEED_MULTIPLIER;
@@ -208,7 +208,6 @@ export const actions: IGameActions = {
     });
     commit("SET_HORSES", horses);
 
-    // If this was the 6th round, calculate grand final results
     if (state.currentRound === 6) {
       await dispatch("calculateGrandFinalResults");
     }
@@ -235,7 +234,6 @@ export const actions: IGameActions = {
   },
 
   async calculateGrandFinalResults({ commit, state }: GameActionContext): Promise<void> {
-    // Calculate total points for each horse across all rounds
     const horseTotalPoints: Record<string, number> = {};
 
     state.roundPoints.forEach((roundPoint) => {
@@ -244,12 +242,11 @@ export const actions: IGameActions = {
       });
     });
 
-    // Convert to array and sort by total points (descending)
     const grandFinalResults: IGrandFinalResults[] = Object.entries(horseTotalPoints)
       .map(([horseId, totalPoints]) => ({
         horseId,
         totalPoints,
-        finalPosition: 0, // Will be set after sorting
+        finalPosition: 0,
       }))
       .sort((a, b) => b.totalPoints - a.totalPoints)
       .map((result, index) => ({

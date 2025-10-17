@@ -17,4 +17,14 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks
+          vendor: ["vue", "vuex", "vue-router"],
+        },
+      },
+    },
+  },
 });

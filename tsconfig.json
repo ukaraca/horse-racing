@@ -18,10 +18,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/features/race-management/page/RaceManagementPage.vue"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue"]
 }

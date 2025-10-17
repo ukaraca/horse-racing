@@ -117,7 +117,6 @@ const emit = defineEmits<{
   gap: $spacing-md;
   min-height: 0;
 
-  // Custom scrollbar
   &::-webkit-scrollbar {
     width: 8px;
   }

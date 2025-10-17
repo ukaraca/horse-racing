@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Modal, Toggle } from "@/shared/components/ui";
-import { useSettings, useFullscreen } from "@/shared/composables";
+import { Modal, Toggle, Button } from "@/shared/components/ui";
+import { useSettings, useFullscreen, useNavigation, useStore } from "@/shared/composables";
+import {
+  SETTINGS_TITLE,
+  AMBIENCE_MUSIC_LABEL,
+  SOUND_EFFECTS_LABEL,
+  FULLSCREEN_LABEL,
+  RETURN_TO_MENU_TEXT,
+} from "./constants/settings-texts";
 
 interface Props {
   modelValue: boolean;
@@ -16,9 +23,17 @@ const emit = defineEmits<Emits>();
 
 const { isMusicEnabled, isSoundEnabled, toggleMusic, toggleSound } = useSettings();
 const { isFullscreen, toggleFullscreen: toggleFullscreenMode } = useFullscreen();
+const { navigateTo, ROUTE_NAMES } = useNavigation();
+const { dispatchAction, GAME_ACTIONS } = useStore();
 
 const handleFullscreenToggle = async () => {
   await toggleFullscreenMode();
+};
+
+const handleReturnToMenu = async () => {
+  emit("update:modelValue", false);
+  await dispatchAction(GAME_ACTIONS.RESET_GAME);
+  navigateTo(ROUTE_NAMES.LANDING);
 };
 
 const fullscreenActive = computed(() => isFullscreen.value);
@@ -28,13 +43,13 @@ const fullscreenActive = computed(() => isFullscreen.value);
   <Modal
     :model-value="modelValue"
     @update:model-value="emit('update:modelValue', $event)"
-    title="Settings"
+    :title="SETTINGS_TITLE"
   >
     <div class="settings-content">
       <div class="setting-item">
         <Toggle
           :model-value="isMusicEnabled"
-          label="Ambience Music"
+          :label="AMBIENCE_MUSIC_LABEL"
           @update:model-value="toggleMusic"
         />
       </div>
@@ -42,7 +57,7 @@ const fullscreenActive = computed(() => isFullscreen.value);
       <div class="setting-item">
         <Toggle
           :model-value="isSoundEnabled"
-          label="Sound Effects"
+          :label="SOUND_EFFECTS_LABEL"
           @update:model-value="toggleSound"
         />
       </div>
@@ -50,10 +65,12 @@ const fullscreenActive = computed(() => isFullscreen.value);
       <div class="setting-item">
         <Toggle
           :model-value="fullscreenActive"
-          label="Fullscreen"
+          :label="FULLSCREEN_LABEL"
           @update:model-value="handleFullscreenToggle"
         />
       </div>
+
+      <Button @click="handleReturnToMenu" variant="secondary">{{ RETURN_TO_MENU_TEXT }}</Button>
     </div>
   </Modal>
 </template>

@@ -8,7 +8,6 @@ import type {
   IRaceState,
   IRaceHorse,
   IGrandFinalResults,
-  IRoundPoints,
 } from "@/shared/types";
 
 export const mutations: IGameMutations = {
@@ -106,17 +105,13 @@ export const mutations: IGameMutations = {
       order: results,
     });
 
-    // Set last finished round ID for modal auto-open
     state.lastFinishedRoundId = state.currentRound;
-
-    // Calculate points for this round (1st gets 10 points, 2nd gets 9, etc.)
     const horsePoints: Record<string, number> = {};
     results.forEach((horseId, index) => {
-      const points = results.length - index; // 10 points for 1st, 9 for 2nd, etc.
+      const points = results.length - index;
       horsePoints[horseId] = points;
     });
 
-    // Store round points
     state.roundPoints.push({
       roundId: state.currentRound,
       horsePoints,

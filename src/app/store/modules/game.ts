@@ -2,6 +2,29 @@ import type { IGameState } from "../types";
 import { mutations } from "../mutations/game";
 import { actions } from "../actions/game";
 import { getters } from "../getters/game";
+import { LOCALSTORAGE_KEYS } from "../constants";
+
+const loadSettings = () => {
+  try {
+    const saved = localStorage.getItem(LOCALSTORAGE_KEYS.SETTINGS);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        isMusicEnabled: parsed.isMusicEnabled ?? true,
+        isSoundEnabled: parsed.isSoundEnabled ?? true,
+        isFullscreenEnabled: false,
+      };
+    }
+  } catch (error) {
+    console.warn("Failed to load settings from localStorage:", error);
+  }
+
+  return {
+    isMusicEnabled: true,
+    isSoundEnabled: true,
+    isFullscreenEnabled: false,
+  };
+};
 
 const state: () => IGameState = () => ({
   horses: [],
@@ -12,11 +35,7 @@ const state: () => IGameState = () => ({
   currentRound: 0,
   surface: null,
   track: null,
-  settings: {
-    isMusicEnabled: true,
-    isSoundEnabled: true,
-    isFullscreenEnabled: false,
-  },
+  settings: loadSettings(),
   raceState: {
     isRaceActive: false,
     isPaused: false,

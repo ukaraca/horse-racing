@@ -66,6 +66,10 @@ export function useAudio() {
     if (!track) return;
 
     try {
+      if (!track.audio.paused) {
+        return;
+      }
+
       track.audio.currentTime = 0;
       if (track.audio.readyState < 2) {
         await track.audio.load();
@@ -75,8 +79,10 @@ export function useAudio() {
 
       await track.audio.play();
       track.isPlaying = true;
-    } catch (error) {
-      console.warn(`Failed to play audio ${key}:`, error);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.warn(`Failed to play audio ${key}:`, error);
+      }
       track.isPlaying = false;
     }
   };
@@ -84,6 +90,10 @@ export function useAudio() {
   const stopAudio = (key: AudioKey) => {
     const track = audioTracks.value.get(key);
     if (!track) return;
+
+    if (track.audio.paused) {
+      return;
+    }
 
     track.audio.pause();
     track.audio.currentTime = 0;

@@ -3,7 +3,7 @@ import { onMounted, onUnmounted } from "vue";
 import { Button } from "@/shared/components/ui";
 import PlayIcon from "../components/PlayIcon.vue";
 import { useNavigation } from "@/shared/composables";
-import { GAME_TITLE, SUBTITLE_TEXT } from "../constants/landing-texts";
+import { GAME_TITLE, SUBTITLE_TEXT, PLAY_TEXT } from "../constants/landing-texts";
 
 const { navigateTo, ROUTE_NAMES } = useNavigation();
 
@@ -43,7 +43,7 @@ onUnmounted(() => {
       <div class="action-section">
         <Button size="lg" @click="handlePlay" class="play-button">
           <PlayIcon class="play-icon" />
-          PLAY
+          {{ PLAY_TEXT }}
         </Button>
       </div>
     </div>
@@ -51,9 +51,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-// Landing Page Specific Styles
-// Component-based styling for LandingPage.vue
-
 .landing-screen {
   @include flex-column-center;
   min-height: 100vh;
