@@ -2,6 +2,8 @@
 
 An interactive horse racing simulation built with Vue 3 and TypeScript.
 
+**Live Demo**: [`https://horse-racing-gamma.vercel.app/`](https://horse-racing-gamma.vercel.app/)
+
 ## 🎯 Overview
 
 The app demonstrates a feature-oriented Vue architecture, deterministic data generation for horses and races, canvas-driven race rendering, and a clean UI layer with reusable components. It includes unit tests (Vitest) and E2E tests (Cypress) with coverage output.
