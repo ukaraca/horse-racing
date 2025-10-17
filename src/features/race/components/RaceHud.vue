@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { HudRenderData } from "../utils/RacePageRenderer";
+
 import { ROUND_TEXT } from "../constants/race-texts";
+import type { HudRenderData } from "../utils/RacePageRenderer";
 
 interface Props {
   hudData: HudRenderData;

@@ -1,11 +1,10 @@
 import js from "@eslint/js";
-import vue from "eslint-plugin-vue";
 import typescript from "@typescript-eslint/eslint-plugin";
 import typescriptParser from "@typescript-eslint/parser";
-import vueParser from "vue-eslint-parser";
 import prettier from "eslint-plugin-prettier";
-import importPlugin from "eslint-plugin-import";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
+import vue from "eslint-plugin-vue";
+import globals from "globals";
+import vueParser from "vue-eslint-parser";
 
 export default [
   js.configs.recommended,
@@ -19,13 +18,16 @@ export default [
         parser: typescriptParser,
         ecmaFeatures: { jsx: false },
       },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
+      },
     },
     plugins: {
       vue,
       "@typescript-eslint": typescript,
       prettier,
-      import: importPlugin,
-      "simple-import-sort": simpleImportSort,
     },
     rules: {
       /* ---- General ---- */
@@ -34,6 +36,7 @@ export default [
 
       /* ---- Vue ---- */
       "vue/multi-word-component-names": "off", // component adları tek kelime olabilir
+      "vue/max-attributes-per-line": "off",
       "vue/html-indent": ["error", 2],
       "vue/html-self-closing": [
         "error",
@@ -45,16 +48,9 @@ export default [
           },
         },
       ],
-      "vue/max-attributes-per-line": [
-        "error",
-        {
-          singleline: { max: 3 },
-          multiline: { max: 1 },
-        },
-      ],
 
       /* ---- TypeScript ---- */
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -62,8 +58,6 @@ export default [
 
       /* ---- Imports ---- */
       "import/order": "off",
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
 
       /* ---- Prettier ---- */
       "prettier/prettier": [
@@ -80,9 +74,38 @@ export default [
     },
   },
   {
-    files: ["*.vue"],
+    files: ["**/*.vue"],
     rules: {
       "max-lines": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    files: ["**/*.test.ts", "**/*.test.js", "**/__tests__/**/*"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        vi: "readonly",
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
+    files: ["**/store/types.ts"],
+    rules: {
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   {

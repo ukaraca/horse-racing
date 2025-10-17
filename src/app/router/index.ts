@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import { ROUTE_NAMES, ROUTE_PATHS } from "./routes";
 
 const router = createRouter({

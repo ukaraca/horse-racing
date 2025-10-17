@@ -1,6 +1,6 @@
 import Button from "./Button.vue";
 import Card from "./Card.vue";
+import { PlayIcon, TrophyIcon } from "./icons";
 import Modal from "./Modal.vue";
 import Toggle from "./Toggle.vue";
-import { TrophyIcon, PlayIcon } from "./icons";
-export { Button, Card, Modal, Toggle, TrophyIcon, PlayIcon };
+export { Button, Card, Modal, PlayIcon, Toggle, TrophyIcon };

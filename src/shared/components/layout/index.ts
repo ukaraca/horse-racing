@@ -1,4 +1,4 @@
-import PageHeader from "./PageHeader.vue";
 import PageContainer from "./PageContainer.vue";
+import PageHeader from "./PageHeader.vue";
 
-export { PageHeader, PageContainer };
+export { PageContainer, PageHeader };

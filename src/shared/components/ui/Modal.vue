@@ -34,7 +34,7 @@ const handleBackdropClick = (event: MouseEvent) => {
             </button>
           </div>
           <div class="modal-body">
-            <slot />
+            <slot></slot>
           </div>
         </div>
       </div>

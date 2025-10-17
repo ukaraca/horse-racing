@@ -1,4 +1,5 @@
 import type { AudioKey } from "@/shared/constants";
+import type { IRaceState } from "@/shared/types";
 
 export interface RacePageAudioManagerConfig {
   playAudio: (sound: AudioKey) => void;
@@ -8,7 +9,7 @@ export interface RacePageAudioManagerConfig {
   initializeAudio: () => void;
   isMusicEnabled: () => boolean;
   isSoundEnabled: () => boolean;
-  getRaceState?: () => any;
+  getRaceState?: () => IRaceState;
   getIsPaused?: () => boolean;
 }
 

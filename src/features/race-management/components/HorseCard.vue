@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+
 import Card from "@/shared/components/ui/Card.vue";
 import type { IHorse } from "@/shared/types";
 
@@ -27,7 +28,7 @@ const conditionColor = computed(() => {
   <Card hoverable padding="sm" class="horse-card">
     <div class="horse-content">
       <div class="horse-header">
-        <div class="color-indicator" :style="{ backgroundColor: horse.color }" />
+        <div class="color-indicator" :style="{ backgroundColor: horse.color }"></div>
       </div>
       <div class="horse-name">{{ horse.name }}</div>
     </div>
@@ -40,7 +41,7 @@ const conditionColor = computed(() => {
             width: conditionPercentage,
             backgroundColor: conditionColor,
           }"
-        />
+        ></div>
       </div>
     </div>
   </Card>

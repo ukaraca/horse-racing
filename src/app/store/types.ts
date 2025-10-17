@@ -1,16 +1,17 @@
 import type { ActionContext } from "vuex";
-import type {
-  IHorse,
-  IRound,
-  IResult,
-  ITrackCondition,
-  ISettings,
-  IRaceState,
-  IRaceHorse,
-  IGrandFinalResults,
-  IRoundPoints,
-} from "@/shared/types";
+
 import type { TSurface } from "@/shared/constants";
+import type {
+  IGrandFinalResults,
+  IHorse,
+  IRaceHorse,
+  IRaceState,
+  IResult,
+  IRound,
+  IRoundPoints,
+  ISettings,
+  ITrackCondition,
+} from "@/shared/types";
 
 export interface IGameState {
   horses: IHorse[];

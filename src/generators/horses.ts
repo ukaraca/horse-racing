@@ -1,13 +1,14 @@
+import {
+  adjectives,
+  animals,
+  colors,
+  type Config,
+  uniqueNamesGenerator,
+} from "unique-names-generator";
+
 import { CONDITION_MAX, CONDITION_MIN, HORSE_COUNT_TOTAL, SURFACES } from "@/shared/constants";
 import type { IHorse } from "@/shared/types";
 import { generateUniqueColors } from "@/shared/utils/colors";
-import {
-  uniqueNamesGenerator,
-  adjectives,
-  colors,
-  animals,
-  type Config,
-} from "unique-names-generator";
 
 const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -56,4 +57,4 @@ const generateHorses = (count = HORSE_COUNT_TOTAL): IHorse[] => {
   return horses;
 };
 
-export { generateHorses, generateHorseName };
+export { generateHorseName, generateHorses };

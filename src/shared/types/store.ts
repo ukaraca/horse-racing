@@ -1,5 +1,6 @@
-import type { Store } from "vuex";
 import type { Router } from "vue-router";
+import type { Store } from "vuex";
+
 import type { IGameState } from "@/app/store/types";
 
 // Vuex Store type

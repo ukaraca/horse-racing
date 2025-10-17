@@ -17,12 +17,13 @@ const classes = computed(() => [
   "base-button",
   `base-button--${props.variant}`,
   `base-button--${props.size}`,
+  props.disabled && "base-button--disabled",
 ]);
 </script>
 
 <template>
   <button :class="classes" :disabled="disabled" type="button">
-    <slot />
+    <slot></slot>
   </button>
 </template>
 

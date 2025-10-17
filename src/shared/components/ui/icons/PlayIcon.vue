@@ -18,6 +18,6 @@ withDefaults(defineProps<Props>(), {
     fill="currentColor"
     :class="class"
   >
-    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+    <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 </template>

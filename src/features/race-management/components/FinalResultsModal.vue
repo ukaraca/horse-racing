@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "@/shared/composables";
+
 import { Modal } from "@/shared/components/ui";
-import type { IHorse, IGrandFinalResults } from "@/shared/types";
+import { useStore } from "@/shared/composables";
+import type { IGrandFinalResults, IHorse } from "@/shared/types";
+import { getMedalEmoji, getPositionColor, getPositionSuffix } from "@/shared/utils";
+
 import {
-  GRAND_FINAL_RESULTS_TITLE,
   AFTER_6_ROUNDS_TEXT,
+  GRAND_FINAL_RESULTS_TITLE,
   SCORING_TEXT,
   TOTAL_POINTS_TEXT,
 } from "../constants/race-management-texts";
-import { getPositionSuffix, getPositionColor, getMedalEmoji } from "@/shared/utils";
 
 interface Props {
   modelValue: boolean;

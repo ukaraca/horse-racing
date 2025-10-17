@@ -1,18 +1,20 @@
 import { ref } from "vue";
-import {
-  PX_PER_METER,
-  V_PARALLAX,
-  DELTA_MIN,
-  DELTA_MAX,
-  DELTA_AFFINITY_SCALE,
-  RACE_TICK_MS,
-  FINALIZE_DELAY_MS,
-} from "../constants";
-import type { IRaceHorse, IHorse, ITrackCondition } from "@/shared/types";
+
 import type { TSurface } from "@/shared/constants";
+import type { IHorse, IRaceHorse, ITrackCondition } from "@/shared/types";
+import type { AppRouter, AppStore } from "@/shared/types/store";
 import { clamp } from "@/shared/utils";
+
+import {
+  DELTA_AFFINITY_SCALE,
+  DELTA_MAX,
+  DELTA_MIN,
+  FINALIZE_DELAY_MS,
+  PX_PER_METER,
+  RACE_TICK_MS,
+  V_PARALLAX,
+} from "../constants";
 import type { RaceCanvasRenderer } from "./RaceCanvasRenderer";
-import type { AppStore, AppRouter } from "@/shared/types/store";
 
 export interface RaceEngineConfig {
   canvasRenderer: RaceCanvasRenderer;

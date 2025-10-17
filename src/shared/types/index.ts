@@ -1,4 +1,4 @@
-import type { TSurface, TRoundDistance } from "../constants";
+import type { TRoundDistance, TSurface } from "../constants";
 
 export type TDirtCond = "fast" | "good" | "wet" | "muddy";
 export type TTurfCond = "firm" | "good" | "soft" | "heavy";

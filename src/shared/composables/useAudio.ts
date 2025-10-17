@@ -1,6 +1,8 @@
-import { ref, computed, onUnmounted, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
+
+import { AUDIO_FILES, AUDIO_KEYS, type AudioKey } from "@/shared/constants";
+
 import { useStore } from "./useStore";
-import { AUDIO_KEYS, AUDIO_FILES, type AudioKey } from "@/shared/constants";
 
 interface AudioTrack {
   audio: HTMLAudioElement;

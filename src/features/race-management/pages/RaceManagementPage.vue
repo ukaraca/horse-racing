@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { Button, TrophyIcon, PlayIcon } from "@/shared/components/ui";
-import { HorseCard, RaceSchedule, RaceResultsModal, FinalResultsModal } from "../components";
-import { useRaceManagement } from "../composables/useRaceManagement";
+
+import { Button, PlayIcon, TrophyIcon } from "@/shared/components/ui";
 import { useStore } from "@/shared/composables";
+
+import { FinalResultsModal, HorseCard, RaceResultsModal, RaceSchedule } from "../components";
+import { useRaceManagement } from "../composables/useRaceManagement";
 import {
-  FINAL_RESULTS_TEXT,
-  PAGE_TITLE,
-  START_RACE_TEXT,
   AVAILABLE_HORSES_TEXT,
-  RACE_SCHEDULE_TEXT,
+  FINAL_RESULTS_TEXT,
   HORSES_COUNT_TEXT,
   NEXT_RACE_TEXT,
+  PAGE_TITLE,
+  RACE_SCHEDULE_TEXT,
+  START_RACE_TEXT,
 } from "../constants/race-management-texts";
 
 const { dispatchAction, GAME_ACTIONS } = useStore();

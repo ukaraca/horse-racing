@@ -1,7 +1,8 @@
 import type { IRaceHorse } from "@/shared/types";
+
 import type { RaceCanvasRenderer } from "./RaceCanvasRenderer";
-import type { RacePageDataManager, HorseStyle } from "./RacePageDataManager";
 import type { RaceEngine } from "./RaceEngine";
+import type { HorseStyle, RacePageDataManager } from "./RacePageDataManager";
 
 export interface RacePageRendererConfig {
   getCanvasRenderer: () => RaceCanvasRenderer;

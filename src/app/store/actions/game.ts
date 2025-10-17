@@ -1,22 +1,24 @@
 import type { ActionContext } from "vuex";
-import type { IGameState, IGameActions } from "../types";
-import type {
-  IHorse,
-  IRound,
-  ITrackCondition,
-  ISettings,
-  TDirtCond,
-  TTurfCond,
-  THybridCond,
-  IRaceHorse,
-  IGrandFinalResults,
-} from "@/shared/types";
-import type { TSurface } from "@/shared/constants";
+
 import { generateHorses } from "@/generators/horses";
-import { ROUND_DISTANCES, HORSES_PER_ROUND, TRACK_CONDITION_MULTIPLIER } from "@/shared/constants";
+import type { TSurface } from "@/shared/constants";
+import { HORSES_PER_ROUND, ROUND_DISTANCES, TRACK_CONDITION_MULTIPLIER } from "@/shared/constants";
+import type {
+  IGrandFinalResults,
+  IHorse,
+  IRaceHorse,
+  IRound,
+  ISettings,
+  ITrackCondition,
+  TDirtCond,
+  THybridCond,
+  TTurfCond,
+} from "@/shared/types";
 import { affinityToMul, clamp } from "@/shared/utils";
 
-type GameActionContext = ActionContext<IGameState, Record<string, any>>;
+import type { IGameActions, IGameState } from "../types";
+
+type GameActionContext = ActionContext<IGameState, Record<string, unknown>>;
 
 const generateTrackCondition = (surface: TSurface): ITrackCondition => {
   if (surface === "dirt") {

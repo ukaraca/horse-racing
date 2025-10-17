@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
+
 import { Button } from "@/shared/components/ui";
-import PlayIcon from "../components/PlayIcon.vue";
 import { useNavigation } from "@/shared/composables";
-import { GAME_TITLE, SUBTITLE_TEXT, PLAY_TEXT } from "../constants/landing-texts";
+
+import PlayIcon from "../components/PlayIcon.vue";
+import { GAME_TITLE, PLAY_TEXT, SUBTITLE_TEXT } from "../constants/landing-texts";
 
 const { navigateTo, ROUTE_NAMES } = useNavigation();
 

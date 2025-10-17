@@ -1,4 +1,4 @@
-import RaceHud from "./RaceHud.vue";
 import Countdown from "./Countdown.vue";
+import RaceHud from "./RaceHud.vue";
 
-export { RaceHud, Countdown };
+export { Countdown, RaceHud };

@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useStore } from "@/shared/composables";
+
 import Card from "@/shared/components/ui/Card.vue";
-import type { IHorse } from "@/shared/types";
+import { useStore } from "@/shared/composables";
+import type { IHorse, IRound } from "@/shared/types";
+
 import {
+  COMPLETED_TEXT,
   NO_SCHEDULE_TEXT,
   PARTICIPANTS_TEXT,
-  ROUND_TEXT,
-  RESULTS_TEXT,
-  COMPLETED_TEXT,
   PENDING_TEXT,
+  RESULTS_TEXT,
+  ROUND_TEXT,
 } from "../constants/race-management-texts";
 
 const { getGetter, GAME_GETTERS } = useStore();
-const rounds = computed(() => getGetter(GAME_GETTERS.ROUNDS));
-const horses = computed(() => getGetter(GAME_GETTERS.HORSES));
+const rounds = computed(() => getGetter<IRound[]>(GAME_GETTERS.ROUNDS));
+const horses = computed(() => getGetter<IHorse[]>(GAME_GETTERS.HORSES));
 
 const getHorseById = (horseId: string): IHorse => {
   return horses.value.find((horse: IHorse) => horse.id === horseId)!;

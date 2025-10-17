@@ -11,7 +11,7 @@ withDefaults(defineProps<Props>(), {
 <template>
   <div class="page-container" :class="{ 'page-container--gradient': gradient }">
     <div class="container">
-      <slot />
+      <slot></slot>
     </div>
   </div>
 </template>

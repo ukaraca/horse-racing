@@ -1,4 +1,4 @@
-import type { IGameState, IGameGetters } from "../types";
+import type { IGameGetters, IGameState } from "../types";
 
 export const getters: IGameGetters = {
   horses: (state: IGameState) => state.horses,

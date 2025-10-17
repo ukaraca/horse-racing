@@ -1,6 +1,7 @@
 import { computed, ref, watch } from "vue";
-import type { IRound, IGrandFinalResults, IHorse } from "@/shared/types";
+
 import { useNavigation, useStore } from "@/shared/composables";
+import type { IGrandFinalResults, IHorse, IRound } from "@/shared/types";
 
 export function useRaceManagement() {
   const { getGetter, dispatchAction, GAME_GETTERS, GAME_ACTIONS } = useStore();

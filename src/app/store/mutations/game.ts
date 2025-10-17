@@ -1,14 +1,15 @@
-import type { IGameState, IGameMutations } from "../types";
 import type {
-  IHorse,
-  IRound,
-  IResult,
-  ITrackCondition,
-  ISettings,
-  IRaceState,
-  IRaceHorse,
   IGrandFinalResults,
+  IHorse,
+  IRaceHorse,
+  IRaceState,
+  IResult,
+  IRound,
+  ISettings,
+  ITrackCondition,
 } from "@/shared/types";
+
+import type { IGameMutations, IGameState } from "../types";
 
 export const mutations: IGameMutations = {
   SET_HORSES(state: IGameState, horses: IHorse[]) {

@@ -1,7 +1,8 @@
-import { PX_PER_METER, TRACK_CONFIG } from "../constants";
-import type { IRaceHorse, IHorse, ITrackCondition } from "@/shared/types";
 import type { TSurface } from "@/shared/constants";
+import type { IHorse, IRaceHorse, ITrackCondition } from "@/shared/types";
 import type { AppStore } from "@/shared/types/store";
+
+import { PX_PER_METER, TRACK_CONFIG } from "../constants";
 import type { RaceCanvasRenderer } from "./RaceCanvasRenderer";
 import type { RaceEngine } from "./RaceEngine";
 
@@ -53,6 +54,17 @@ export class RacePageDataManager {
   getRaceState(): RaceStateData {
     const store = this.config.getStore();
     const raceState = store.getters["game/raceState"];
+
+    // Handle null/undefined raceState gracefully
+    if (!raceState) {
+      return {
+        isRaceActive: false,
+        isPaused: false,
+        currentRaceHorses: [],
+        raceDistance: 1200,
+      };
+    }
+
     return {
       isRaceActive: raceState.isRaceActive,
       isPaused: raceState.isPaused,

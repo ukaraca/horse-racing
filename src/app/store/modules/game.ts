@@ -1,8 +1,8 @@
-import type { IGameState } from "../types";
-import { mutations } from "../mutations/game";
 import { actions } from "../actions/game";
-import { getters } from "../getters/game";
 import { LOCALSTORAGE_KEYS } from "../constants";
+import { getters } from "../getters/game";
+import { mutations } from "../mutations/game";
+import type { IGameState } from "../types";
 
 const loadSettings = () => {
   try {

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Modal, Toggle, Button } from "@/shared/components/ui";
-import { useSettings, useFullscreen, useNavigation, useStore } from "@/shared/composables";
+
+import { Button, Modal, Toggle } from "@/shared/components/ui";
+import { useFullscreen, useNavigation, useSettings, useStore } from "@/shared/composables";
+
 import {
-  SETTINGS_TITLE,
   AMBIENCE_MUSIC_LABEL,
-  SOUND_EFFECTS_LABEL,
   FULLSCREEN_LABEL,
   RETURN_TO_MENU_TEXT,
+  SETTINGS_TITLE,
+  SOUND_EFFECTS_LABEL,
 } from "./constants/settings-texts";
 
 interface Props {

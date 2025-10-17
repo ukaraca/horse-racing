@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, watch } from "vue";
-import { useStore as useVuexStore } from "vuex";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useStore as useVuexStore } from "vuex";
+
+import { PauseIcon, PlayIcon } from "@/shared/components/ui/icons";
+import { useAudio, useFullscreen, useNavigation, useStore } from "@/shared/composables";
+import type { AudioKey, TSurface } from "@/shared/constants";
+import type { IHorse, IRaceHorse } from "@/shared/types";
 
 import { Countdown, RaceHud } from "../components";
-import { useFullscreen, useAudio, useNavigation, useStore } from "@/shared/composables";
-import { PlayIcon, PauseIcon } from "@/shared/components/ui/icons";
-import type { IRaceHorse, IHorse } from "@/shared/types";
-import type { TSurface, AudioKey } from "@/shared/constants";
 import { PX_PER_METER } from "../constants";
 import {
   RaceCanvasRenderer,
   RaceEngine,
+  RacePageAudioManager,
   RacePageDataManager,
   RacePageRenderer,
-  RacePageAudioManager,
 } from "../utils";
 
 const store = useVuexStore();

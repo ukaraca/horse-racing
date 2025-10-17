@@ -1,7 +1,8 @@
-import { createStore, Store } from "vuex";
 import type { Plugin } from "vuex";
+import { createStore, Store } from "vuex";
+
+import { GAME_ACTIONS, LOCALSTORAGE_KEYS } from "./constants";
 import game from "./modules/game";
-import { LOCALSTORAGE_KEYS, GAME_ACTIONS } from "./constants";
 import type { IGameState } from "./types";
 
 interface RootState {

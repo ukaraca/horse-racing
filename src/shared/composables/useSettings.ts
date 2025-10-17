@@ -1,4 +1,5 @@
 import { computed } from "vue";
+
 import { useStore } from "@/shared/composables";
 
 export function useSettings() {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+
 import SettingsButton from "@/features/settings/SettingsButton.vue";
 import SettingsPanel from "@/features/settings/SettingsPanel.vue";
 

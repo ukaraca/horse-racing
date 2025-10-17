@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IHorse } from "@/shared/types";
+
 import HorseCard from "./HorseCard.vue";
 
 interface Props {

@@ -1,13 +1,14 @@
-import { useStore as vuexUseStore } from "vuex";
 import type { Store } from "vuex";
+import { useStore as vuexUseStore } from "vuex";
+
+import {
+  GAME_ACTIONS,
+  GAME_GETTERS,
+  type GameAction,
+  type GameGetter,
+} from "@/app/store/constants";
 import type { IGameState } from "@/app/store/types";
 import type { PayloadType } from "@/shared/types/store";
-import {
-  GAME_GETTERS,
-  GAME_ACTIONS,
-  type GameGetter,
-  type GameAction,
-} from "@/app/store/constants";
 
 /**
  * Type-safe Vuex store composable
@@ -18,7 +19,7 @@ export function useStore() {
   /**
    * Type-safe getter access
    */
-  const getGetter = <T = any>(getter: GameGetter): T => {
+  const getGetter = <T = unknown>(getter: GameGetter): T => {
     return store.getters[getter] as T;
   };
 
@@ -32,10 +33,15 @@ export function useStore() {
   /**
    * Type-safe mutation commit
    */
+  const commitMutation = (mutation: string, payload?: PayloadType) => {
+    return store.commit(mutation, payload);
+  };
+
   return {
     store,
     getGetter,
     dispatchAction,
+    commitMutation,
     getters: store.getters,
     dispatch: store.dispatch,
     commit: store.commit,

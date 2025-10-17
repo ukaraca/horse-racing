@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useStore } from "vuex";
+
 import Button from "@/shared/components/ui/Button.vue";
 import Modal from "@/shared/components/ui/Modal.vue";
 import type { IHorse } from "@/shared/types";
-import { ROUND_RESULTS_TITLE, CLOSE_TEXT } from "../constants/race-management-texts";
-import { getPositionSuffix, getPositionColor, getMedalEmoji } from "@/shared/utils";
+import { getMedalEmoji, getPositionColor, getPositionSuffix } from "@/shared/utils";
+
+import { CLOSE_TEXT, ROUND_RESULTS_TITLE } from "../constants/race-management-texts";
 
 interface Props {
   modelValue: boolean;

@@ -22,13 +22,16 @@ const toggle = () => {
     <button
       type="button"
       class="toggle-switch"
-      :class="{ 'toggle-switch--active': modelValue }"
+      :class="{
+        'toggle-switch--active': modelValue,
+        'toggle-switch--disabled': disabled,
+      }"
       :disabled="disabled"
       @click="toggle"
       role="switch"
       :aria-checked="modelValue"
     >
-      <span class="toggle-slider" />
+      <span class="toggle-slider"></span>
     </button>
     <label v-if="label" class="toggle-label" @click="toggle">
       {{ label }}
